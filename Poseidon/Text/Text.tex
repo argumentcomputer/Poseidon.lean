@@ -1,0 +1,80 @@
+\documentclass{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath} % Required for some math elements
+\usepackage{amsfonts}
+\usepackage{amsthm} % for proof pkg
+\usepackage{amssymb}
+\usepackage{verbatim}
+\usepackage{hyperref}
+\usepackage{comment}
+\usepackage{color}
+\usepackage{parskip} % Remove paragraph indentation
+\usepackage[margin=1in]{geometry}
+\usepackage[inline]{enumitem}
+\usepackage{mathtools}
+\usepackage{multirow}
+\usepackage{listings}
+
+\usepackage{color}
+\definecolor{keywordcolor}{rgb}{0.7, 0.1, 0.1}   % red
+\definecolor{tacticcolor}{rgb}{0.0, 0.1, 0.6}    % blue
+\definecolor{commentcolor}{rgb}{0.4, 0.4, 0.4}   % grey
+\definecolor{symbolcolor}{rgb}{0.0, 0.1, 0.6}    % blue
+\definecolor{sortcolor}{rgb}{0.1, 0.5, 0.1}      % green
+\definecolor{attributecolor}{rgb}{0.7, 0.1, 0.1} % red
+
+\def\lstlanguagefiles{lstlean.tex}
+% set default language
+\lstset{language=lean}
+
+\newtheorem{lemma}{Lemma}
+\newtheorem{claim}{Claim}
+\newtheorem{theorem}{Theorem}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+\newtheorem{fact}{Fact}[section]
+\theoremstyle{remark}
+\newtheorem*{remark}{Remark}
+
+\newcommand{\anote}[1]{{\color{magenta} [AM: #1]}}
+\newcommand{\Gen}{\mathsf{Gen}}
+\newcommand{\Enc}{\mathsf{Enc}}
+\newcommand{\Dec}{\mathsf{Dec}}
+\newcommand{\pk}{\mathit{pk}}
+\newcommand{\sk}{\mathit{sk}}
+\newcommand{\bbZ}{\mathbb{Z}}
+\newcommand{\bit}{\{0,1\}}
+\newcommand{\la}{\leftarrow}
+\newcommand{\ninN}{{n \in \mathbf{N}}}
+\newcommand{\cF}{\mathcal{F}}
+\newcommand{\cG}{\mathcal{G}}
+\newcommand{\RF}{\mathsf{RF}}
+\newcommand{\Half}{\frac{1}{2}}
+\newcommand{\F}{\mathbb{F}}
+\newcommand{\Adv}{\mathcal{A}}
+\newcommand{\Ext}{\mathcal{E}}
+
+\newcommand{\ignore}[1]{{}}
+
+\newcommand{\samples}{\overset{\$}{\leftarrow}}
+\newcommand{\hash}{\ensuremath{\mathcal{H}}}
+\newcommand{\doubleplus}{+\kern-1.3ex+\kern0.8ex}
+\newcommand{\mdoubleplus}{\ensuremath{\mathbin{+\mkern-10mu+}}}
+
+\title{The Neptune Hash Function formalisation in Lean 4}
+\author{Ashvni Narayanan and Daniel Rogozin, for Yatima Inc}
+\date{\today\footnote{This document may be updated frequently.}}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+\section{Preliminaries}
+
+\section{Formalisation itself}
+
+\end{document}
