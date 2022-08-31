@@ -6,7 +6,8 @@ noncomputable section
 
 namespace Neptune
 
-variable (p t : ℕ) [Fact p.Prime] [Field (Zmod p)] [Fintype (Finₓ t)]
+variable {p t : ℕ} [Fact p.Prime] [Field (Zmod p)] [Fintype (Finₓ t)]
+variable {R_f R_p : ℕ}
 
 /- The AddRoundConstant linear step of a single round of the Poseidon permutation -/
 def ARC (c a : Finₓ t → Zmod p) (i : Finₓ t) : Zmod p := (a i) + (c i)
@@ -24,10 +25,10 @@ def R_p_round (S_box' : Zmod p → Zmod p) (c : Finₓ t → Zmod p)
 
 /- The Poseidon permutation function, takes as input `t` elements, and returns `t` elements;
   this is defined in terms of compositions of `R_f_round` and `R_p_round`. -/
-def P_perm (R_f R_p : ℕ) (S_box' : Zmod p → Zmod p) (c a : Finₓ t → Zmod p)
+def P_perm (S_box' : Zmod p → Zmod p) (c a : Finₓ t → Zmod p)
   (MDS' : Matrix (Finₓ t) (Finₓ t) (Zmod p)) : Finₓ t → Zmod p :=
-  (R_f_round p t S_box' c MDS')^[R_f] ((R_p_round p t S_box' c MDS')^[R_p]
-  ((R_f_round p t S_box' c MDS')^[R_f] a))
+  (R_f_round S_box' c MDS')^[R_f] ((R_p_round S_box' c MDS')^[R_p]
+  ((R_f_round S_box' c MDS')^[R_f] a))
 
 /- Adding an `r`-chunk to the state. -/
 def add_to_state (r cap : ℕ) (m : Finₓ r → Zmod p) 
