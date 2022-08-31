@@ -9,27 +9,28 @@ namespace Neptune
 variable (p t : ℕ) [Fact p.Prime] [Field (Zmod p)] [Fintype (Finₓ t)]
 
 /- The AddRoundConstant linear step of a single round of the Poseidon permutation -/
-def ARC' (c a : Finₓ t → Zmod p) (i : Finₓ t) : Zmod p := (a i) + (c i)
+def ARC (c a : Finₓ t → Zmod p) (i : Finₓ t) : Zmod p := (a i) + (c i)
 
 /- An `R_f`-round, that is, a full round. -/
-def R_f_round' (S_box' : Zmod p → Zmod p) (c : Finₓ t → Zmod p)
+def R_f_round (S_box' : Zmod p → Zmod p) (c : Finₓ t → Zmod p)
   (MDS' : Matrix (Finₓ t) (Finₓ t) (Zmod p)) (a : Finₓ t → Zmod p) : Finₓ t → Zmod p :=
-  Matrix.mulVecₓ MDS' (λ i => S_box' (ARC' p t c a i))
+  Matrix.mulVecₓ MDS' (λ i => S_box' (ARC p t c a i))
 
 /- An `R_p`-round, that is, a partial round. -/
-def R_p_round' (S_box' : Zmod p → Zmod p) (c : Finₓ t → Zmod p)
+def R_p_round (S_box' : Zmod p → Zmod p) (c : Finₓ t → Zmod p)
   (MDS' : Matrix (Finₓ t) (Finₓ t) (Zmod p)) (a : Finₓ t → Zmod p) : Finₓ t → Zmod p :=
-  Matrix.mulVecₓ MDS' (λ i => dite ((i : ℕ) = 0) (λ _ => S_box' (ARC' p t c a i)) (λ _ => ARC' p t c a i))
+  Matrix.mulVecₓ MDS' 
+    (λ i => dite ((i : ℕ) = 0) (λ _ => S_box' (ARC p t c a i)) (λ _ => ARC p t c a i))
 
 /- The Poseidon permutation function, takes as input `t` elements, and returns `t` elements;
   this is defined in terms of compositions of `R_f_round` and `R_p_round`. -/
-def P_perm' (R_f R_p : ℕ) (S_box' : Zmod p → Zmod p) (c a : Finₓ t → Zmod p)
+def P_perm (R_f R_p : ℕ) (S_box' : Zmod p → Zmod p) (c a : Finₓ t → Zmod p)
   (MDS' : Matrix (Finₓ t) (Finₓ t) (Zmod p)) : Finₓ t → Zmod p :=
-  (R_f_round' p t S_box' c MDS')^[R_f] ((R_p_round' p t S_box' c MDS')^[R_p]
-  ((R_f_round' p t S_box' c MDS')^[R_f] a))
+  (R_f_round p t S_box' c MDS')^[R_f] ((R_p_round p t S_box' c MDS')^[R_p]
+  ((R_f_round p t S_box' c MDS')^[R_f] a))
 
 /- Adding an `r`-chunk to the state. -/
-def add_to_state' (r cap : ℕ) (m : Finₓ r → Zmod p) 
+def add_to_state (r cap : ℕ) (m : Finₓ r → Zmod p) 
   (a : Finₓ t → Zmod p) (h : t = r + cap) : Finₓ t → Zmod p :=
   λ i => dite ((i : ℕ) < r) (λ h => a i + m (Finₓ.castLt i h)) (λ h => a i)
 
@@ -44,7 +45,7 @@ lemma helper_1 (d r cap : ℕ) (j : Finₓ (d * r + (r + cap))) :
     apply add_lt_add_of_lt_of_le j.prop le_rfl
 
 /-- The Poseidon hash function, takes `N` bits and returns `o` `𝔽_p`-elements. -/
-def P_hash' (R_f R_p r o cap : ℕ) (hr : 1 ≤ r) (S_box' : Zmod p → Zmod p) 
+def P_hash (R_f R_p r o cap : ℕ) (hr : 1 ≤ r) (S_box' : Zmod p → Zmod p) 
   (c : Finₓ (r + cap) → Zmod p)
   (MDS' : Matrix (Finₓ (r + cap)) (Finₓ (r + cap)) (Zmod p)) (ho : o ≤ r + cap)
   (k : ℕ) (a : Finₓ (k * r + (r + cap)) → Zmod p) : Finₓ o → Zmod p := by sorry
