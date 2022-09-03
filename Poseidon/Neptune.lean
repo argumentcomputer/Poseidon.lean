@@ -15,20 +15,25 @@ def ARC (c a : Finₓ t → Zmod p) (i : Finₓ t) : Zmod p := (a i) + (c i)
 /- An `R_f`-round, that is, a full round. -/
 def R_f_round (S_box' : Zmod p → Zmod p) (c : Finₓ t → Zmod p)
   (MDS' : Matrix (Finₓ t) (Finₓ t) (Zmod p)) (a : Finₓ t → Zmod p) : Finₓ t → Zmod p :=
-  Matrix.mulVecₓ MDS' (λ i => S_box' (ARC p t c a i))
+  Matrix.mulVecₓ MDS' (λ i => S_box' (ARC c a i))
 
 /- An `R_p`-round, that is, a partial round. -/
 def R_p_round (S_box' : Zmod p → Zmod p) (c : Finₓ t → Zmod p)
   (MDS' : Matrix (Finₓ t) (Finₓ t) (Zmod p)) (a : Finₓ t → Zmod p) : Finₓ t → Zmod p :=
   Matrix.mulVecₓ MDS' 
-    (λ i => dite ((i : ℕ) = 0) (λ _ => S_box' (ARC p t c a i)) (λ _ => ARC p t c a i))
+    (λ i => dite ((i : ℕ) = 0) (λ _ => S_box' (ARC c a i)) (λ _ => ARC c a i))
+
+def iterate {A : Type} (n : ℕ) (f : A → A) : A → A :=
+  match n with
+    | .zero => f
+    | .succ k => f ∘ (iterate k f)
 
 /- The Poseidon permutation function, takes as input `t` elements, and returns `t` elements;
   this is defined in terms of compositions of `R_f_round` and `R_p_round`. -/
 def P_perm (S_box' : Zmod p → Zmod p) (c a : Finₓ t → Zmod p)
   (MDS' : Matrix (Finₓ t) (Finₓ t) (Zmod p)) : Finₓ t → Zmod p :=
-  (R_f_round S_box' c MDS')^[R_f] ((R_p_round S_box' c MDS')^[R_p]
-  ((R_f_round S_box' c MDS')^[R_f] a))
+  (iterate R_f (R_f_round S_box' c MDS')) ((iterate R_p (R_p_round S_box' c MDS'))
+  ((iterate R_f (R_f_round S_box' c MDS')) a))
 
 /- Adding an `r`-chunk to the state. -/
 def add_to_state (r cap : ℕ) (m : Finₓ r → Zmod p) 
