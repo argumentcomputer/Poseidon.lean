@@ -35,8 +35,8 @@ def P_perm (R_f R_p : ℕ) (S_box' : Zmod p → Zmod p) (c a : Finₓ t → Zmod
   ((iterate R_f $ R_f_round p t S_box' c MDS') a))
 
 /- Adding an `r`-chunk to the state. -/
-def add_to_state (r cap : ℕ) (m : Finₓ r → Zmod p) 
-  (a : Finₓ t → Zmod p) (h : t = r + cap) : Finₓ t → Zmod p :=
+def add_to_state (r : ℕ) (m : Finₓ r → Zmod p) 
+  (a : Finₓ t → Zmod p) : Finₓ t → Zmod p :=
   λ i => dite ((i : ℕ) < r) (λ h => a i + m (Finₓ.castLt i h)) (λ _ => a i)
 
 lemma helper_1 (d r cap : ℕ) (j : Finₓ (d * r + (r + cap))) :
@@ -49,33 +49,54 @@ lemma helper_1 (d r cap : ℕ) (j : Finₓ (d * r + (r + cap))) :
     rw [h1]
     apply add_lt_add_of_lt_of_le j.prop le_rfl
 
-def leq_to_le {a b : ℕ} (p : a < b) : a ≤ b := by sorry
+#check @Nat.le_of_lt
+
+def leq_to_le {a b : ℕ} (p : a < b) : a ≤ b := sorry
 
 def fin_coercion (ho : o < r + cap) : Finₓ o → Finₓ (r + cap) :=
   λ (i : Finₓ o) => 
     (⟨(i : ℕ), lt_of_le_of_ltₓ (leq_to_le i.prop) ho⟩ : Finₓ (r + cap))
 
-def compose_MDS (R_f R_p r o cap : ℕ) (hr : 1 ≤ r) (S_box' : Zmod p → Zmod p)
-  (c : Finₓ (r + cap) → Zmod p) (MDS : Matrix (Finₓ (r + cap)) (Finₓ (r + cap)) (Zmod p))
-  (k : ℕ) (a : Finₓ (k * r + (r + cap)) → Zmod p) : Finₓ (r + cap) → Zmod p := by
-    induction k with
-      | .zero => rw [Nat.zero_mul] at a; rw [zero_add] at a;
-                    refine λ i => P_perm p (r + cap) R_p R_f S_box' c a MDS i
-      | .succ d hd => refine λ i => P_perm p (r + cap) R_p R_f S_box' c
-                                      (add_to_state p (r + cap) r cap 
-                                         (λ j => a ⟨(.succ d) + j, 
-                                             add_lt_add_of_le_of_lt ((le_mul_iff_one_le_right (Nat.succ_pos _)).2 hr)
-                                             (lt_add_of_lt_of_nonneg j.prop (Nat.zero_le _))⟩) 
-                                  
-                                         (hd (λ j => dite ((j : ℕ) < (.succ d) * r) (λ h => a (Finₓ.castLt j (lt_trans h
-                                         ((lt_add_iff_pos_right _).2 (add_pos_of_pos_of_nonneg (nat.pos_of_ne_zero
-                                         (Nat.one_le_iff_ne_zero.1 hr)) (Nat.zero_le _)))))) (λ h => a ⟨(j : ℕ) + r,
-                                         helper_1 d r cap j⟩))) 
-                                      refl)
-                                      MDS 
-                                      i
+def r_elements_of_zmodp (r d cap : ℕ) 
+                        (a : Finₓ ((.succ d) * r + (r + cap)) → Zmod p)
+                        (hr : 1 ≤ r) : Finₓ r → Zmod p := 
+  (λ (j : Finₓ r) => 
+    a ⟨(.succ d) + j, 
+        add_lt_add_of_le_of_lt ((le_mul_iff_one_le_right (Nat.succ_posₓ _)).2 hr)
+          (lt_add_of_lt_of_nonneg j.prop (Nat.zero_le _))⟩) 
 
-/-- The Poseidon hash function, takes `N` bits and returns `o` `𝔽_p`-elements. -/
+def helper_step (d r : ℕ)
+                (a : Finₓ ((.succ d) * r + (r + cap)) → Zmod p) :=
+  (λ j h => a ⟨(j : ℕ) + r, helper_1 d r cap j⟩)
+
+def simplifications (a : Finₓ ((.succ d) * r + (r + cap)) → Zmod p) (hr : 1 ≤ r) :=
+  (λ j h => 
+    a (Finₓ.castLt j (lt_trans h
+              ((lt_add_iff_pos_right _).2 (add_pos_of_pos_of_nonneg (Nat.pos_of_ne_zero
+                (Nat.one_le_iff_ne_zero.1 hr)) (Nat.zero_le _))))))
+
+def compose_MDS (R_f R_p r o cap : ℕ) (hr : 1 ≤ r) 
+                (S_box : Zmod p → Zmod p) (c : Finₓ (r + cap) → Zmod p) 
+                (MDS : Matrix (Finₓ (r + cap)) (Finₓ (r + cap)) (Zmod p)) (k : ℕ) 
+                (a : Finₓ (k * r + (r + cap)) → Zmod p) : Finₓ (r + cap) → Zmod p :=
+  by induction k with
+    | zero => 
+        rw [Nat.zero_mul] at a 
+        rw [zero_add] at a;
+        refine λ i => P_perm p (r + cap) R_p R_f S_box c a MDS i
+    | succ d hd => sorry
+/-     
+     refine (λ i => P_perm p (r + cap) R_p R_f S_box c
+          (add_to_state p (r + cap) r 
+            (r_elements_of_zmodp r d cap d hr) 
+            (hd (λ j => dite ((j : ℕ) < (.succ d) * r) (λ h => a (Finₓ.castLt j (lt_trans h
+              ((lt_add_iff_pos_right _).2 (add_pos_of_pos_of_nonneg (Nat.pos_of_ne_zero
+                (Nat.one_le_iff_ne_zero.1 hr)) (Nat.zero_le _)))))) (helper_step d r a j))))
+                MDS 
+                i)
+-/
+
+/- The Poseidon hash function, takes `N` bits and returns `o` `𝔽_p`-elements. -/
 def P_hash (R_f R_p r o cap : ℕ) (hr : 1 ≤ r) (S_box : Zmod p → Zmod p) 
   (c : Finₓ (r + cap) → Zmod p)
   (MDS : Matrix (Finₓ (r + cap)) (Finₓ (r + cap)) (Zmod p)) (ho : o ≤ r + cap)
