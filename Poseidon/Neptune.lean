@@ -65,16 +65,17 @@ def r_elements_of_zmodp (r d cap : ℕ)
 
 def helper_step (d r : ℕ)
                 (a : Finₓ ((.succ d) * r + (r + cap)) → Zmod p) 
-                (j : Finₓ (d * r + (r + cap))) := λ h => a ⟨(j : ℕ) + r, helper_1 d r cap j⟩
+                (j : Finₓ (d * r + (r + cap))) : ¬j.val < (Nat.succ d) * r → Zmod p := 
+  λ _ => a ⟨(j : ℕ) + r, helper_1 d r cap j⟩
 
-def simplifications (a : Finₓ ((.succ d) * r + (r + cap)) → Zmod p) 
+def simplifications (d r cap : ℕ) (a : Finₓ ((.succ d) * r + (r + cap)) → Zmod p) 
                     (hr : 1 ≤ r) (j : Finₓ (d * r + (r + cap))) :=
   λ h => 
     a (Finₓ.castLt j (lt_transₓ h
               ((lt_add_iff_pos_right _).2 (add_pos_of_pos_of_nonneg (Nat.pos_of_ne_zeroₓ
                 (Nat.one_le_iff_ne_zero.1 hr)) (Nat.zero_leₓ _)))))
 
-def compose_MDS (R_f R_p r o cap : ℕ) (hr : 1 ≤ r) 
+def compose_MDS (R_f R_p r cap : ℕ) (hr : 1 ≤ r) 
                 (S_box : Zmod p → Zmod p) (c : Finₓ (r + cap) → Zmod p) 
                 (MDS : Matrix (Finₓ (r + cap)) (Finₓ (r + cap)) (Zmod p)) (k : ℕ) 
                 (a : Finₓ (k * r + (r + cap)) → Zmod p) : Finₓ (r + cap) → Zmod p :=
@@ -83,11 +84,15 @@ def compose_MDS (R_f R_p r o cap : ℕ) (hr : 1 ≤ r)
         rw [Nat.zero_mul] at a 
         rw [zero_add] at a;
         refine λ i => P_perm p (r + cap) R_p R_f S_box c a MDS i
-    | succ d hd => refine (λ i => P_perm p (r + cap) R_p R_f S_box c
-          (add_to_state p (r + cap) r (r_elements_of_zmodp r d cap a hr) 
-            (hd (λ j => dite ((j : ℕ) < (.succ d) * r) (simplifications a hr j) (λ h => a ⟨(j : ℕ) + r, helper_1 d r cap j⟩))))
-                MDS 
-                i)
+    | succ d hd => 
+        refine (λ i => P_perm p (r + cap) R_p R_f S_box c
+                         (add_to_state p (r + cap) r (r_elements_of_zmodp p r d cap a hr) 
+                            (hd (λ j => dite ((j : ℕ) < (.succ d) * r) 
+                                          (simplifications p d r cap a hr j) 
+                                          (helper_step p d r a j)
+                                          )))
+                             MDS 
+                             i)
 
 /- The Poseidon hash function, takes `N` bits and returns `o` `𝔽_p`-elements. -/
 def P_hash (R_f R_p r o cap : ℕ) (hr : 1 ≤ r) (S_box : Zmod p → Zmod p) 
@@ -95,8 +100,8 @@ def P_hash (R_f R_p r o cap : ℕ) (hr : 1 ≤ r) (S_box : Zmod p → Zmod p)
   (MDS : Matrix (Finₓ (r + cap)) (Finₓ (r + cap)) (Zmod p)) (ho : o ≤ r + cap)
   (k : ℕ) (a : Finₓ (k * r + (r + cap)) → Zmod p) : Finₓ o → Zmod p :=
   @Function.comp (Finₓ o) (Finₓ (r + cap)) (Zmod p)
-  (compose_MDS p R_f R_p r o hr S_box c MDS ho k a)
-  (fin_coercion ho)
+    (compose_MDS p R_f R_p r hr S_box c MDS ho k a)
+    (fin_coercion ho)
 
 
 end Neptune
