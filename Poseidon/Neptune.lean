@@ -69,7 +69,7 @@ def helper_step (d r : ℕ)
   λ _ => a ⟨(j : ℕ) + r, helper_1 d r cap j⟩
 
 def simplifications (d r cap : ℕ) (a : Finₓ ((.succ d) * r + (r + cap)) → Zmod p) 
-                    (hr : 1 ≤ r) (j : Finₓ (d * r + (r + cap))) :=
+                    (hr : 1 ≤ r) (j : Finₓ (d * r + (r + cap))) : j.val < (Nat.succ d) * r → Zmod p :=
   λ h => 
     a (Finₓ.castLt j (lt_transₓ h
               ((lt_add_iff_pos_right _).2 (add_pos_of_pos_of_nonneg (Nat.pos_of_ne_zeroₓ
