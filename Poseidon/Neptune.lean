@@ -97,10 +97,10 @@ def compose_MDS (R_f R_p r cap : ℕ) (hr : 1 ≤ r)
 /- The Poseidon hash function, takes `N` bits and returns `o` `𝔽_p`-elements. -/
 def P_hash (R_f R_p r o cap : ℕ) (hr : 1 ≤ r) (S_box : Zmod p → Zmod p) 
   (c : Finₓ (r + cap) → Zmod p)
-  (MDS : Matrix (Finₓ (r + cap)) (Finₓ (r + cap)) (Zmod p)) (ho : o ≤ r + cap)
+  (MDS : Matrix (Finₓ (r + cap)) (Finₓ (r + cap)) (Zmod p)) (ho : o < r + cap)
   (k : ℕ) (a : Finₓ (k * r + (r + cap)) → Zmod p) : Finₓ o → Zmod p :=
   @Function.comp (Finₓ o) (Finₓ (r + cap)) (Zmod p)
-    (compose_MDS p R_f R_p r hr S_box c MDS ho k a)
+    (compose_MDS p R_f R_p r cap hr S_box c MDS ho k a)
     (fin_coercion ho)
 
 
