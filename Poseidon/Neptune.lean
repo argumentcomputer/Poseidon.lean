@@ -49,7 +49,7 @@ lemma helper_1 (d r cap : ℕ) (j : Finₓ (d * r + (r + cap))) :
     rw [h1]
     apply add_lt_add_of_lt_of_le j.prop le_rfl
 
-def leq_to_le {a b : ℕ} (p : a < b) : a ≤ b := sorry
+def leq_to_le {a b : ℕ} (p : a < b) : a ≤ b := le_of_ltₓ p
 
 def fin_coercion (ho : o < r + cap) : Finₓ o → Finₓ (r + cap) :=
   λ (i : Finₓ o) => 
