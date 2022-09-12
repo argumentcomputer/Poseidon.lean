@@ -1,8 +1,11 @@
 import Mathbin.Data.Fin.Basic
 import Mathbin.Data.Matrix.Basic
 import Mathbin.Data.Zmod.Algebra
+import Poseidon.Util.Util
 
 noncomputable section
+
+open Util
 
 namespace Neptune
 
@@ -21,11 +24,6 @@ def R_p_round (S_box' : Zmod p → Zmod p) (c : Finₓ t → Zmod p)
   (MDS' : Matrix (Finₓ t) (Finₓ t) (Zmod p)) (a : Finₓ t → Zmod p) : Finₓ t → Zmod p :=
   Matrix.mulVecₓ MDS' 
     (λ i => dite ((i : ℕ) = 0) (λ _ => S_box' (ARC p t c a i)) (λ _ => ARC p t c a i))
-
-def iterate {A : Sort u} (n : ℕ) (f : A → A) : A → A :=
-  match n with
-    | .zero => id
-    | .succ k => f ∘ (iterate k f)
 
 /- The Poseidon permutation function, takes as input `t` elements, and returns `t` elements;
   this is defined in terms of compositions of `R_f_round` and `R_p_round`. -/
@@ -48,12 +46,6 @@ lemma helper_1 (d r cap : ℕ) (j : Finₓ (d * r + (r + cap))) :
       rw [← Nat.succ_mul]
     rw [h1]
     apply add_lt_add_of_lt_of_le j.prop le_rfl
-
-def leq_to_le {a b : ℕ} (p : a < b) : a ≤ b := le_of_ltₓ p
-
-def fin_coercion (ho : o < r + cap) : Finₓ o → Finₓ (r + cap) :=
-  λ (i : Finₓ o) => 
-    (⟨(i : ℕ), lt_of_le_of_ltₓ (leq_to_le i.prop) ho⟩ : Finₓ (r + cap))
 
 def r_elements_of_zmodp (r d cap : ℕ) 
                         (a : Finₓ ((.succ d) * r + (r + cap)) → Zmod p)
@@ -101,7 +93,6 @@ def P_hash (R_f R_p r o cap : ℕ) (hr : 1 ≤ r) (S_box : Zmod p → Zmod p)
   (k : ℕ) (a : Finₓ (k * r + (r + cap)) → Zmod p) : Finₓ o → Zmod p :=
   @Function.comp (Finₓ o) (Finₓ (r + cap)) (Zmod p)
     (compose_MDS p R_f R_p r cap hr S_box c MDS k a)
-    (fin_coercion ho)
-
+    (Fin.fin_coercion ho)
 
 end Neptune
