@@ -1,18 +1,18 @@
-import Mathbin
-
 namespace Util
 
-def iterate {A : Sort u} (n : ℕ) (f : A → A) : A → A :=
-  match n with
-    | .zero => id
-    | .succ k => f ∘ (iterate k f)
+namespace Matrix
 
-namespace Fin
+def Matrix (A : Type u) : Type u := Array (Array A)
 
-def fin_coercion (ho : o < r + cap) : Finₓ o → Finₓ (r + cap) :=
-  λ (i : Finₓ o) => 
-    (⟨(i : ℕ), lt_of_le_of_ltₓ (le_of_ltₓ i.prop) ho⟩ : Finₓ (r + cap))
+def array_to_fun {A : Type} [Inhabited A] (x : Array A) : Fin (Array.size x) → A :=
+  fun i => x[i]
 
-end Fin
+def sum {A : Type} [HAdd A A A] [OfNat A 0] (x : Array A) : A := 
+  Array.foldl (. + .) 0 x
+
+def dotProduct [HMul A A A] [HAdd A A A] [OfNat A 0] (x : Array A) (y : Array A) : A :=
+  sum $ Array.zipWith x y (. * .)
+
+end Matrix
 
 end Util

@@ -7,6 +7,9 @@ def Zmod (n : Nat) : Type :=
   | 0 => Int
   | n + 1 => Fin (n + 1)
 
+instance : Inhabited (Zmod n) where
+  default := sorry
+
 def toZmod (a : Int) : Zmod 0 := a
 
 def fromZmod (a : Zmod 0) : Int := a

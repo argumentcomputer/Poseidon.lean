@@ -37,6 +37,15 @@ def add_to_state (r : ℕ) (m : Finₓ r → Zmod p)
   (a : Finₓ t → Zmod p) : Finₓ t → Zmod p :=
   λ i => dite ((i : ℕ) < r) (λ h => a i + m (Finₓ.castLt i h)) (λ _ => a i)
 
+def fin_coercion (ho : o < r + cap) : Finₓ o → Finₓ (r + cap) :=
+  λ (i : Finₓ o) => 
+    (⟨(i : ℕ), lt_of_le_of_ltₓ (le_of_ltₓ i.prop) ho⟩ : Finₓ (r + cap))
+
+def iterate {A : Sort u} (n : ℕ) (f : A → A) : A → A :=
+  match n with
+    | .zero => id
+    | .succ k => f ∘ (iterate k f)
+
 lemma helper_1 (d r cap : ℕ) (j : Finₓ (d * r + (r + cap))) :
   ↑j + r < d.succ * r + (r + cap) := by
     have h1 : d.succ * r + (r + cap) = d * r + (r + cap) + r := by
@@ -93,6 +102,6 @@ def P_hash (R_f R_p r o cap : ℕ) (hr : 1 ≤ r) (S_box : Zmod p → Zmod p)
   (k : ℕ) (a : Finₓ (k * r + (r + cap)) → Zmod p) : Finₓ o → Zmod p :=
   @Function.comp (Finₓ o) (Finₓ (r + cap)) (Zmod p)
     (compose_MDS p R_f R_p r cap hr S_box c MDS k a)
-    (Fin.fin_coercion ho)
+    (fin_coercion ho)
 
 end Neptune
