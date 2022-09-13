@@ -19,4 +19,7 @@ instance Zmod_add : HAdd (Zmod n) (Zmod n) (Zmod n) where
     match n with
       | 0 => toZmod (fromZmod a + fromZmod b)
       | (n + 1) => sorry
+
+instance Zmod_mul : HMul (Zmod n) (Zmod n) (Zmod n) where
+  hMul a b := sorry
 end Zmod

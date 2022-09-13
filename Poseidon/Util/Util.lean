@@ -2,16 +2,18 @@ namespace Util
 
 namespace Matrix
 
-def Matrix (A : Type u) : Type u := Array (Array A)
+variable (A : Type) [Inhabited A] [HAdd A A A] [HMul A A A] [OfNat A 0]
 
-def array_to_fun {A : Type} [Inhabited A] (x : Array A) : Fin (Array.size x) → A :=
+def Matrix : Type := Array (Array A)
+
+def array_to_fun (x : Array A) : Fin (Array.size x) → A :=
   fun i => x[i]
 
-def sum {A : Type} [HAdd A A A] [OfNat A 0] (x : Array A) : A := 
+def sum (x : Array A) : A := 
   Array.foldl (. + .) 0 x
 
-def dotProduct [HMul A A A] [HAdd A A A] [OfNat A 0] (x : Array A) (y : Array A) : A :=
-  sum $ Array.zipWith x y (. * .)
+def dotProduct(x : Array A) (y : Array A) : A :=
+  sum A $ Array.zipWith x y (. * .)
 
 end Matrix
 
