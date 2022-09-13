@@ -12,7 +12,7 @@ def array_to_fun (x : Array A) : Fin (Array.size x) → A :=
 def sum (x : Array A) : A := 
   Array.foldl (. + .) 0 x
 
-def dotProduct(x : Array A) (y : Array A) : A :=
+def dotProduct (x : Array A) (y : Array A) : A :=
   sum A $ Array.zipWith x y (. * .)
 
 end Matrix
