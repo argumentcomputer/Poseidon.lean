@@ -25,6 +25,11 @@ def R_p_round (S_box' : Zmod p → Zmod p) (c : Finₓ t → Zmod p)
   Matrix.mulVecₓ MDS' 
     (λ i => dite ((i : ℕ) = 0) (λ _ => S_box' (ARC p t c a i)) (λ _ => ARC p t c a i))
 
+def iterate {A : Sort u} (n : ℕ) (f : A → A) : A → A :=
+  match n with
+    | .zero => id
+    | .succ k => f ∘ (iterate k f)
+
 /- The Poseidon permutation function, takes as input `t` elements, and returns `t` elements;
   this is defined in terms of compositions of `R_f_round` and `R_p_round`. -/
 def P_perm (R_f R_p : ℕ) (S_box' : Zmod p → Zmod p) (c a : Finₓ t → Zmod p)
@@ -40,11 +45,6 @@ def add_to_state (r : ℕ) (m : Finₓ r → Zmod p)
 def fin_coercion (ho : o < r + cap) : Finₓ o → Finₓ (r + cap) :=
   λ (i : Finₓ o) => 
     (⟨(i : ℕ), lt_of_le_of_ltₓ (le_of_ltₓ i.prop) ho⟩ : Finₓ (r + cap))
-
-def iterate {A : Sort u} (n : ℕ) (f : A → A) : A → A :=
-  match n with
-    | .zero => id
-    | .succ k => f ∘ (iterate k f)
 
 lemma helper_1 (d r cap : ℕ) (j : Finₓ (d * r + (r + cap))) :
   ↑j + r < d.succ * r + (r + cap) := by
