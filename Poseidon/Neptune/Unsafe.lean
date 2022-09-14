@@ -1,9 +1,9 @@
 import Poseidon.Util.Zmod
-import Poseidon.Util.Util
+import Poseidon.Util.Matrix
 
 namespace Unsafe
 
-open Zmod Util.Matrix
+open Zmod Matrix
 
 variable (p t : Nat)
 
