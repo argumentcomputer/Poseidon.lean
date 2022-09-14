@@ -1,25 +1,19 @@
+abbrev Zmod (_ : Nat) : Type := Int
+
 namespace Zmod
 
-open Int
+def ofInt (a : Int) : Zmod n := a
 
-def Zmod (n : Nat) : Type :=
-  match n with
-  | 0 => Int
-  | n + 1 => Fin (n + 1)
+def rep (a : Zmod n) : Int := a
+
+instance : Add (Zmod n) where
+  add (a b : Zmod n) := (rep a) + (rep b) % (n : Int)
+
+instance : Mul (Zmod n) where
+  mul (a b : Zmod n) := (rep a) + (rep b) % (n : Int)
 
 instance : Inhabited (Zmod n) where
-  default := sorry
+  default := 0
 
-def toZmod (a : Int) : Zmod 0 := a
-
-def fromZmod (a : Zmod 0) : Int := a
-
-instance Zmod_add : HAdd (Zmod n) (Zmod n) (Zmod n) where
-  hAdd a b :=
-    match n with
-      | 0 => toZmod (fromZmod a + fromZmod b)
-      | (n + 1) => sorry
-
-instance Zmod_mul : HMul (Zmod n) (Zmod n) (Zmod n) where
-  hMul a b := sorry
-end Zmod
+instance {n m : Nat} : OfNat (Zmod n) m where
+  ofNat := m
