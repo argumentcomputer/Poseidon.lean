@@ -22,7 +22,7 @@ def R_f_round (S_box' : Zmod p → Zmod p) (c : Finₓ t → Zmod p)
 /- An `R_p`-round, that is, a partial round. -/
 def R_p_round (S_box' : Zmod p → Zmod p) (c : Finₓ t → Zmod p)
   (MDS' : Matrix (Finₓ t) (Finₓ t) (Zmod p)) (a : Finₓ t → Zmod p) : Finₓ t → Zmod p :=
-  Matrix.mulVecₓ MDS' 
+  Matrix.mulVecₓ MDS'
     (λ i => dite ((i : ℕ) = 0) (λ _ => S_box' (ARC p t c a i)) (λ _ => ARC p t c a i))
 
 def iterate {A : Sort u} (n : ℕ) (f : A → A) : A → A :=

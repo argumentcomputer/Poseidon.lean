@@ -46,6 +46,11 @@ def matrixMul (m : Matrix A r c) (m' : Matrix A c r') : Matrix A r r' :=
 
 instance : HMul (Matrix A r c) (Matrix A c r') (Matrix A r r') := ⟨matrixMul⟩
 
+def vectorSum (v₁ v₂ : Vector A c) : Vector A c :=
+  fun i => v₁ i + v₂ i
+
+instance : HAdd (Vector A c) (Vector A c) (Vector A c) := ⟨vectorSum⟩
+
 end Matrix
 
 end abstract_linear_algebra
