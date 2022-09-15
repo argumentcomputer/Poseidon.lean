@@ -42,20 +42,6 @@ def add_to_state (r : Nat) (m : Vector (Zmod p) r)
   (a : Vector (Zmod p) t) : Vector (Zmod p) t :=
   λ i => dite ((i : Nat) < r) (λ h => a i + m (castLt i h)) (λ _ => a i)
 
-def fin_coercion (ho : o < r + cap) : Fin o → Fin (r + cap) :=
-  λ (i : Fin o) => 
-    (⟨(i : Nat), lt_of_le_of_lt (le_of_lt i.2) ho⟩ : Fin (r + cap))
-
-lemma helper_1 (d r cap : Nat) (j : Fin (d * r + (r + cap))) :
-  ↑j + r < (d + 1) * r + (r + cap) := by
-    have h1 : d.succ * r + (r + cap) = d * r + (r + cap) + r := by
-      rw [Nat.add_assoc]
-      rw [Nat.add_comm _ r]
-      rw [← Nat.add_assoc _ _ (r + cap)] 
-      rw [← Nat.succ_mul]
-    rw [h1]
-    apply add_lt_add_of_lt_of_le j.2 (Nat.le_refl r)
-
 def r_elements_of_zmodp (r d cap : Nat) 
                         (a : Vector (Zmod p) ((d + 1) * r + (r + cap)))
                         (hr : 1 ≤ r) : Vector (Zmod p) r := 
@@ -67,7 +53,7 @@ def r_elements_of_zmodp (r d cap : Nat)
 def helper_step (d r : Nat)
                 (a : Vector (Zmod p) ((d + 1) * r + (r + cap))) 
                 (j : Fin (d * r + (r + cap))) : ¬j.1 < (d + 1) * r → Zmod p := 
-  λ _ => a ⟨(j : Nat) + r, helper_1 d r cap j⟩
+  λ _ => a ⟨(j : Nat) + r, helper d r cap j⟩
 
 def simplifications (d r cap : Nat) (a : Vector (Zmod p) ((d + 1) * r + (r + cap))) 
                     (hr : 1 ≤ r) (j : Fin (d * r + (r + cap))) : j.val < (Nat.succ d) * r → Zmod p :=
@@ -84,7 +70,7 @@ def compose_MDS (R_f R_p r cap : Nat) (hr : 1 ≤ r)
 TODO: we have the following error
 code generator does not support recursor 'Nat.rec' yet, 
 consider using 'match ... with' and/or structural recursion
--/    
+-/   
   match k with
     | 0 => by
       rw [Nat.zero_mul] at a 
