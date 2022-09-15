@@ -85,15 +85,16 @@ TODO: we have the following error
 code generator does not support recursor 'Nat.rec' yet, 
 consider using 'match ... with' and/or structural recursion
 -/    
-  by induction k with
-    | zero => 
-        rw [Nat.zero_mul] at a 
-        rw [Nat.zero_add] at a;
-        refine λ i => P_perm p (r + cap) R_p R_f S_box c a MDS i
-    | succ d hd => 
+  match k with
+    | 0 => by
+      rw [Nat.zero_mul] at a 
+      rw [Nat.zero_add] at a;
+      refine λ i => P_perm p (r + cap) R_p R_f S_box c a MDS i
+    | (d + 1) => by
+        let rec_call := compose_MDS R_f R_p r cap hr S_box c MDS d 
         refine (λ i => P_perm p (r + cap) R_p R_f S_box c
                          (add_to_state p (r + cap) r (r_elements_of_zmodp p r d cap a hr) 
-                            (hd (λ j => dite ((j : ℕ) < (.succ d) * r) 
+                            (rec_call (λ j => dite ((j : ℕ) < (.succ d) * r) 
                                           (simplifications p d r cap a hr j) 
                                           (helper_step p d r a j)
                                           )))
