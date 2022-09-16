@@ -22,40 +22,78 @@ theorem add_lt_add_of_le_of_lt
   {a b c d : Nat} (h₁ : a ≤ b) (h₂ : c < d) : a + c < b + d :=
   lt_of_le_of_lt (Nat.add_le_add_right h₁ c) (Nat.add_lt_add_left h₂ b)
 
-lemma mul_le_mul_iff_left {a b c : Nat} : a * b ≤ a * c ↔ b ≤ c :=
-  Iff.intro sorry sorry
+lemma mul_le_mul_iff_left {a b c : Nat} (h : a > 0) : a * b ≤ a * c ↔ b ≤ c :=
+  Iff.intro (flip (@Nat.le_of_mul_le_mul_left b c a) h) (@Nat.mul_le_mul_left b c a)
+
+lemma le_mul_iff_one_le_right₁ {a b : Nat} (h : 0 < b) : a ≤ a * b → 1 ≤ b := by
+  induction a
+  intro
+  assumption
+  intro
+  assumption
+
+lemma le_mul_iff_one_le_right₂ {a b : Nat} : 1 ≤ b → a ≤ a * b := by
+  intro h
+  induction a
+  rw [Nat.zero_mul]
+  exact (Nat.le_refl 0)
+  rw [Nat.succ_mul]
+  rw [←Nat.add_one]
+  apply Nat.add_le_add
+  assumption
+  exact h
 
 theorem le_mul_iff_one_le_right
-  {a b : Nat} (x : 0 < b) : a ≤ a * b ↔ 1 ≤ b := 
-  Iff.trans (by rw [Nat.mul_one]) mul_le_mul_iff_left
+  {a b : Nat} (h : 0 < b) : a ≤ a * b ↔ 1 ≤ b := 
+  Iff.intro (le_mul_iff_one_le_right₁ h) (fun _ => le_mul_iff_one_le_right₂ h)
 
 theorem lt_add_of_lt_of_nonneg
   {a b c : Nat} : b < c → 0 ≤ a → b < c + a :=
   Nat.add_zero b ▸ add_lt_add_of_lt_of_le
 
-theorem lt_add_iff_pos_right
-  (a : Nat) {b : Nat} : a < a + b ↔ 0 < b := by
-  apply Iff.intro 
-  . induction a
-    rw [Nat.zero_add b]
-    intro h
-    exact h
-    intro h
-    rw [Nat.succ_add] at *
-    simp [Nat.lt_of_succ_lt_succ] at h
-    sorry
-  . induction a
-    intros
-    rw [Nat.zero_add] at *
-    exact
-    sorry
+lemma lt_add_iff_pos_right₁ {a b : Nat} : a < a + b → 0 < b := by
+  induction a
+  intro h
+  rw [Nat.zero_add] at *
+  exact h
+  intro h
+  rw [Nat.succ_add] at *
+  sorry
 
+lemma lt_add_iff_pos_right₂ {a b : Nat} : 0 < b → a < a + b := by
+  intro h
+  induction a
+  rw [Nat.zero_add]
+  exact h
+  rw [Nat.succ_add] at *
+  apply Nat.succ_lt_succ
+  assumption
+
+theorem lt_add_iff_pos_right
+  (a : Nat) {b : Nat} : a < a + b ↔ 0 < b :=
+  Iff.intro lt_add_iff_pos_right₁ lt_add_iff_pos_right₂
 
 theorem add_pos_of_pos_of_nonneg
   {a b : Nat} (ha : 0 < a) (hb : 0 ≤ b) : 0 < a + b :=
   Nat.zero_add 0 ▸ add_lt_add_of_lt_of_le ha hb
 
-theorem one_le_iff_ne_zero {n : Nat} : 1 ≤ n ↔ n ≠ 0 := sorry
+lemma one_le_iff_ne_zero₁ {n : Nat} (p : 1 ≤ n) : n ≠ 0 := by
+  induction n
+  contradiction
+  exact (Nat.succ_ne_zero _)
+
+lemma one_leq_succ {n : Nat} : 1 ≤ Nat.succ n := by
+  induction n
+  exact Nat.le_refl 1
+  sorry
+
+lemma one_le_iff_ne_zero₂ {n : Nat} (p : n ≠ 0) : 1 ≤ n := by
+  induction n
+  contradiction
+  exact one_leq_succ
+
+theorem one_le_iff_ne_zero {n : Nat} : 1 ≤ n ↔ n ≠ 0 := 
+  Iff.intro one_le_iff_ne_zero₁ one_le_iff_ne_zero₂
 
 end Nat
 
