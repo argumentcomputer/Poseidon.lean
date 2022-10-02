@@ -1,71 +1,74 @@
-/-
-I'm not sure which of the following two approaches is actually better so I implemented both of them
+import Poseidon.Util.Ring
 
-WARNING: There's like a 50% chance I got the transposes wrong in these definitions, so the first
-step is going to be to test if it's right
+/-!
+# Basic Linear Algebra
+
+This file contains some basic definitions needed 
+
+NOTE : I apologize for this code, this is very bad Lean code and I am ashamed. 
+The upside is it should be fast, and very easy to improve.
 -/
-section abstract_linear_algebra
 
-def Vector (A : Type) (n : Nat) : Type := Fin n → A
+variable (R : Type) [Ring R]
 
-def Matrix (A : Type) (r c : Nat) : Type := Fin c → Fin r → A
+section vector
+
+abbrev Vector := Array R
+
+namespace Vector
+
+variable {R} [OfNat R 0]
+
+/-
+NOTE : All these definitions only make sense when we know that the two arrays representing the
+vectors have the same dimension. Otherwise you'll get nonsense. 
+
+Look at `AbstractMatrix.lean` for a comment on the prefered solution where vectors carry their
+length, which is currently blocked by some formalization of Array lemmas that still needs to be done
+in the standard library.
+-/
+
+def add (v w : Vector R) : Vector R := v.zip w |>.map fun (x, y) => x + y
+
+instance : Add (Vector R) := ⟨add⟩
+
+def dot (v w : Vector R) : R := v.zip w |>.foldr (fun (x, y) acc => acc + x * y) 0
+
+def scale (r : R) (v : Vector R) : Vector R := v.map fun x => x * r
+
+def zero (R) [OfNat R 0] (dim : Nat) : Vector R := Array.mkArray dim 0
+
+instance : HMul R (Vector R) (Vector R) := ⟨scale⟩
+
+end Vector
+end vector
+
+section matrix
+
+abbrev Matrix (R : Type) [Ring R] := Array $ Array R
 
 namespace Matrix
 
-variable [Inhabited A] [Add A] [Mul A] [OfNat A 0]
+variable {R}
 
-def last (f : Fin n.succ → A) : Fin n → A := f ∘ Fin.succ
+def row (M : Matrix R) (i : Nat) : Vector R := Id.run do
+  let mut answer : Vector R := #[]
+  for col in M do
+    answer := answer.push col[i]!
+  return answer
 
-open Nat in
-theorem lt_succ (n : Nat) : n < n + 1 := by
-  rw [add_one]
-  apply lt_succ_of_le
-  apply Nat.le_refl
+def transpose (M : Matrix R) : Matrix R := Id.run do
+  let rowNum := M[0]!.size
+  let mut answer : Matrix R := #[]
+  for idx in List.range rowNum do
+    answer := answer.push (row M idx)
+  return answer
 
-def sum (f : Fin n → A) : A := match n with
-  | 0 => 0
-  | n + 1 => f ⟨n, lt_succ n⟩ + sum (last f)
+def action (M : Matrix R) (v : Vector R) : Vector R :=
+  M.zip v |>.foldl (fun v (col, r) => v + r * col) (Vector.zero R v.size)
 
-def dotProduct (v w : Vector A c) : A := sum fun ⟨i, h⟩ => v ⟨i, h⟩ * w ⟨i, h⟩
-
-infixl:50 " ⬝ " => dotProduct
-
-def transpose (m : Matrix A r c) : Matrix A c r := fun ⟨i, hi⟩ ⟨j, hj⟩ => m ⟨j, hj⟩ ⟨i, hi⟩
-
-postfix:max "ᵀ" => transpose
-
-variable (m : Matrix A r c) (k : Fin r) (v : Vector A c)
-
-def matrixVecAction (m : Matrix A r c) (v : Vector A c) : Vector A r := 
-  fun ⟨i, h⟩ => mᵀ ⟨i, h⟩ ⬝ v
-
-instance : HMul (Matrix A r c) (Vector A c) (Vector A r) := ⟨matrixVecAction⟩
-
-def matrixMul (m : Matrix A r c) (m' : Matrix A c r') : Matrix A r r' := 
-  fun ⟨i, hi⟩ ⟨j, hj⟩ => mᵀ ⟨j, hj⟩ ⬝ m' ⟨i, hi⟩
-
-instance : HMul (Matrix A r c) (Matrix A c r') (Matrix A r r') := ⟨matrixMul⟩
-
-def vectorSum (v₁ v₂ : Vector A c) : Vector A c :=
-  fun i => v₁ i + v₂ i
-
-instance : HAdd (Vector A c) (Vector A c) (Vector A c) := ⟨vectorSum⟩
+def mul (M N : Matrix R) : Matrix R :=
+  N.map (fun v => action M v)
 
 end Matrix
-
-end abstract_linear_algebra
-
-section concrete_linear_algebra
-
-
-
-end concrete_linear_algebra
-
--- def array_to_fun (x : Array A) : Fin (Array.size x) → A :=
---   fun i => x[i]
-
--- def sum (x : Array A) : A := 
---   Array.foldl (. + .) 0 x
-
--- def dotProduct (x : Array A) (y : Array A) : A :=
---   sum A $ Array.zipWith x y (. * .)
+end matrix
