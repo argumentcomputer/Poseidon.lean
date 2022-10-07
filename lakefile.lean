@@ -7,7 +7,7 @@ package Poseidon
 lean_lib Poseidon
 
 require YatimaStdLib from git
-  "https://github.com/yatima-inc/YatimaStdLib.lean" @ "868abcb58c5d96927c65ac304ee1e99a21d57457"
+  "https://github.com/yatima-inc/YatimaStdLib.lean" @ "3cb5f4706cd49c1803cdb7a5aec53ca58e8a8b1a"
 
 require LSpec from git
-   "https://github.com/yatima-inc/LSpec" @ "a8dc2f38fc38f16efcc877ca8a4c7b37d3965db0"
+   "https://github.com/yatima-inc/LSpec" @ "9c9f3cc9f3148c1b2d6071a35e54e4c5392373b7"
