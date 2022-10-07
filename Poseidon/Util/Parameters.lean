@@ -1,4 +1,4 @@
-import Poseidon.Util.Matrix
+import YatimaStdLib.Matrix
 import YatimaStdLib.Zmod
 
 namespace poseidonperm_x5_255_5

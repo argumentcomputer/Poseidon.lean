@@ -1,5 +1,5 @@
 import YatimaStdLib.Zmod
-import Poseidon.Util.Matrix
+import YatimaStdLib.Matrix
 
 -- TODO : Add these to `YatimaStdLib.Zmod`
 

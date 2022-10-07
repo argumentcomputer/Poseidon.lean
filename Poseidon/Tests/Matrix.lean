@@ -1,5 +1,5 @@
 import LSpec
-import Poseidon.Util.Matrix
+import YatimaStdLib.Matrix
 
 open LSpec Vector
 
