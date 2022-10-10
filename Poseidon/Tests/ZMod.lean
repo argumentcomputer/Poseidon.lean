@@ -2,7 +2,6 @@ import LSpec
 import YatimaStdLib.Zmod
 import Lean.Meta.Match
 
-
 open LSpec SlimCheck Zmod
 
 instance {n : Nat} : Shrinkable (Zmod n) where

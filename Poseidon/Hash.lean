@@ -9,7 +9,7 @@ def Zmod.norm (x : Zmod n) : Nat :=
 instance : Repr (Zmod n) where
   reprPrec n _ := s!"0x{Nat.toDigits 16 n.norm |>.asString}"
 
-def repeatM {m : Type _ → Type _} [Monad m] (f : m α) : Nat → m PUnit
+private def repeatM {m : Type _ → Type _} [Monad m] (f : m α) : Nat → m PUnit
   | 0 => pure ()
   | n + 1 => f *> repeatM f n
 
