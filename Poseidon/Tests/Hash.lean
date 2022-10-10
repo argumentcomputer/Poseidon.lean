@@ -1,6 +1,6 @@
 import LSpec
 import Poseidon.Hash
-import Poseidon.Util.Parameters
+import Poseidon.Util.PoseidonPerm255
 
 open LSpec
 
