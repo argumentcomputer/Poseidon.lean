@@ -12,10 +12,11 @@ def testProfile : Poseidon.Profile := {
   fullRounds := 8
   partialRounds := 60
   prime := poseidonperm_x5_255_5.p
+  a := 5
   sBox := fun x => x^5
 }
 
-def testContext : Poseidon.Context testProfile := {
+def testContext : Poseidon.Hash.Context testProfile := {
   mdsMatrix := poseidonperm_x5_255_5.MDS
   roundConst := poseidonperm_x5_255_5.roundConstants
 }
