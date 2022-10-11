@@ -1,3 +1,4 @@
+import Poseidon.Profile
 import YatimaStdLib.Zmod
 import YatimaStdLib.Matrix
 
@@ -15,11 +16,7 @@ private def repeatM {m : Type _ → Type _} [Monad m] (f : m α) : Nat → m PUn
 
 namespace Poseidon
 
-structure Profile where
-  (N t fullRounds partialRounds prime : Nat)
-  sBox : Zmod prime → Zmod prime
-
-def Profile.n (p : Profile) := p.N/p.t 
+namespace Hash
 
 structure Context (profile : Profile) where
   mdsMatrix : Matrix (Zmod profile.prime)
@@ -31,6 +28,9 @@ structure State (profile : Profile) where
 
 def initialState {profile : Profile} (input : Vector (Zmod profile.prime)) : State profile := ⟨0, input⟩
 
+end Hash
+
+open Hash in
 abbrev HashM (profile : Profile) := ReaderT (Context profile) $ StateM (State profile)
 
 variable (profile : Profile)
@@ -63,10 +63,13 @@ def runRounds : HashM profile PUnit :=
   repeatM (partialRound profile) (profile.partialRounds) *>
   repeatM (fullRound profile) (profile.fullRounds / 2) 
 
+open Hash in
 def hash (context : Context profile) (input : Vector (Zmod profile.prime)) : State profile := 
   Prod.snd <$> StateT.run (ReaderT.run (runRounds profile) context) (initialState input) 
 
 end HashM
+
+open Hash
 
 -- TODO : Add more validation by sequencing with the `ExceptM` monad
 def validateInputs (context : Context profile)  (input : Vector (Zmod profile.prime)) : Bool :=
