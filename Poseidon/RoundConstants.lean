@@ -37,7 +37,7 @@ private def padOne (u : UInt64) : Nat → UInt64
   | 0     => u
   | n + 1 => (u <<< 1) + 1 |> (padOne · n)
 
--- TODO : Figure out if choosing to reverse is a bad idea
+-- TODO : Figure out if choosing to reverse is a bad idea <- We may be too far in -- at this point
 
 private partial def UInt64.toByteArray (u : UInt64) : ByteArray := 
   let rec loop (u : UInt64) (acc : Array UInt8) :=
@@ -122,27 +122,45 @@ def init (prof : Poseidon.Profile) : RCState prof.prime where
 
 abbrev RoundConstantM (profile : Poseidon.Profile) := StateM (RCState profile.prime)
 
-private def repeatWhile {m : Type _ → Type _} [Monad m] (f : m PUnit) (test : m Bool) : m PUnit := 
-  test >>= fun b => if b then pure () else f
+-- TODO : Add this to YatimaStdLib?
+private partial def repeatWhile {m : Type _ → Type _} [Monad m] (test : m Bool) (f : m PUnit) : m PUnit := 
+  test >>= fun b => if b then f *> (repeatWhile test f) else pure ()
 
-def enoughConst : RoundConstantM prof Bool := 
-  get >>= fun s => pure $ s.rndCon.size ≥ (prof.fullRounds + prof.partialRounds)*prof.t
+def notEnoughConst : RoundConstantM prof Bool := 
+  get >>= fun s => pure $ s.rndCon.size < (prof.fullRounds + prof.partialRounds)*prof.t
 
-def enoughBits : RoundConstantM prof Bool :=
-  get >>= fun s => pure $ s.bitRound.size ≥ 255
+def notEnoughBits : RoundConstantM prof Bool :=
+  get >>= fun s => pure $ s.bitRound.size < 255
 
-def generateBit : RoundConstantM prof Bit := do
+def extractBit : RoundConstantM prof Bit := do
   let stt := (← get).state
   let bits := #[stt.getBit 0, stt.getBit 13, stt.getBit 23, 
                 stt.getBit 38, stt.getBit 51, stt.getBit 62]
   return bArXOr bits
 
-def addToBitArray : RoundConstantM prof Unit := sorry
+def generateBitArray : RoundConstantM prof Unit := do
+  modify fun ⟨_, s, rC⟩ => ⟨#[], s, rC⟩
+  repeatWhile notEnoughBits do
+    let b₁ ← extractBit
+    modify (fun ⟨br, s, rc⟩ => ⟨br, s.shiftAdd b₁, rc⟩)
+    let b₂ ← extractBit
+    modify (fun ⟨br, s, rc⟩ => ⟨br, s.shiftAdd b₂, rc⟩)
+    if b₁ == one then
+      modify fun ⟨bR, s, rC⟩ => ⟨bR.push b₂, s, rC⟩
+    else
+      pure ()
 
-def generate (prof : Poseidon.Profile) : RoundConstantM prof Unit := do
+def generate (prof : Poseidon.Profile) : RoundConstantM prof Unit := do 
   for _ in [:160] do
-    let b ← generateBit
+    let b ← extractBit
     modify (fun ⟨br, s, rc⟩ => ⟨br, s.shiftAdd b, rc⟩)
+  repeatWhile notEnoughConst do
+    generateBitArray
+    let c := bArToNat (← get).bitRound
+    if c < prof.prime then 
+      modify fun ⟨bR, s, rC⟩ => ⟨bR, s, rC.push c⟩
+    else
+      return ()
   return ()
 
 def RoundConstantM.run (profile : Poseidon.Profile) : Array (Zmod profile.prime) :=
@@ -157,3 +175,7 @@ def testProfile : Poseidon.Profile := {
   a := 5
   sBox := fun x => x^5
 }
+
+#eval RoundConstantM.run testProfile |>.size
+
+#eval 68*5
