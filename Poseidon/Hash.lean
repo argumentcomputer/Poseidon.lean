@@ -1,39 +1,28 @@
 import Poseidon.Profile
+import Poseidon.ForYatimaStdLib
 import YatimaStdLib.Zmod
 import YatimaStdLib.Matrix
-
--- TODO : Add these to `YatimaStdLib.Zmod`
-
-def Zmod.norm (x : Zmod n) : Nat :=
-  if x < 0 then (x.rep - (x.rep / n - 1) * n).toNat else x.toNat
-
-instance : Repr (Zmod n) where
-  reprPrec n _ := s!"0x{Nat.toDigits 16 n.norm |>.asString}"
-
-private def repeatM {m : Type _ → Type _} [Monad m] (f : m α) : Nat → m PUnit
-  | 0 => pure ()
-  | n + 1 => f *> repeatM f n
 
 namespace Poseidon
 
 namespace Hash
 
-structure Context (profile : Profile) where
-  mdsMatrix : Matrix (Zmod profile.prime)
-  roundConst : Array (Zmod profile.prime)
+structure Context (profile : HashProfile) where
+  mdsMatrix : Matrix (Zmod profile.p)
+  roundConst : Array (Zmod profile.p)
 
-structure State (profile : Profile) where
+structure State (profile : HashProfile) where
   round : Nat
-  state : Vector (Zmod profile.prime)
+  state : Vector (Zmod profile.p)
 
-def initialState {profile : Profile} (input : Vector (Zmod profile.prime)) : State profile := ⟨0, input⟩
+def initialState {profile : HashProfile} (input : Vector (Zmod profile.p)) : State profile := ⟨0, input⟩
 
 end Hash
 
 open Hash in
-abbrev HashM (profile : Profile) := ReaderT (Context profile) $ StateM (State profile)
+abbrev HashM (profile : HashProfile) := ReaderT (Context profile) $ StateM (State profile)
 
-variable (profile : Profile)
+variable (profile : HashProfile)
 
 namespace HashM
 
@@ -60,11 +49,11 @@ def partialRound : HashM profile PUnit :=
 
 def runRounds : HashM profile PUnit :=  
   repeatM (fullRound profile) (profile.fullRounds / 2) *>
-  repeatM (partialRound profile) (profile.partialRounds) *>
+  repeatM (partialRound profile) (profile.partRounds) *>
   repeatM (fullRound profile) (profile.fullRounds / 2) 
 
 open Hash in
-def hash (context : Context profile) (input : Vector (Zmod profile.prime)) : State profile := 
+def hash (context : Context profile) (input : Vector (Zmod profile.p)) : State profile := 
   Prod.snd <$> StateT.run (ReaderT.run (runRounds profile) context) (initialState input) 
 
 end HashM
@@ -72,13 +61,13 @@ end HashM
 open Hash
 
 -- TODO : Add more validation by sequencing with the `ExceptM` monad
-def validateInputs (context : Context profile)  (input : Vector (Zmod profile.prime)) : Bool :=
+def validateInputs (context : Context profile)  (input : Vector (Zmod profile.p)) : Bool :=
   input.size == profile.t &&
-  context.roundConst.size == profile.t * (profile.fullRounds + profile.partialRounds) &&
+  context.roundConst.size == profile.t * (profile.fullRounds + profile.partRounds) &&
   profile.t == context.mdsMatrix.size &&
   profile.t == context.mdsMatrix.transpose.size
 
-def hash (context : Context profile)  (input : Vector (Zmod profile.prime)) : Vector (Zmod profile.prime) := 
+def hash (context : Context profile)  (input : Vector (Zmod profile.p)) : Vector (Zmod profile.p) := 
   if validateInputs profile context input then (HashM.hash profile context input).state else #[]
 
 end Poseidon

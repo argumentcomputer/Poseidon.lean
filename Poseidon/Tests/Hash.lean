@@ -1,34 +1,28 @@
 import LSpec
 import Poseidon.Hash
-import Poseidon.Util.PoseidonPerm255
+import Poseidon.Parameters.PoseidonPerm255
 
 open LSpec
 
+namespace Poseidon 
+
 section poseidonperm_x5_255_5
 
-def testProfile : Poseidon.Profile := {
-  N := 1275
-  t := 5
-  fullRounds := 8
-  partialRounds := 60
-  prime := poseidonperm_x5_255_5.p
-  a := 5
-  sBox := fun x => x^5
-}
+def testProfile : Poseidon.HashProfile := PermX5_255_5
 
 def testContext : Poseidon.Hash.Context testProfile := {
-  mdsMatrix := poseidonperm_x5_255_5.MDS
-  roundConst := poseidonperm_x5_255_5.roundConstants
+  mdsMatrix := PermX5_255_5.MDS
+  roundConst := PermX5_255_5.roundConstants
 }
 
-def input : Vector (Zmod testProfile.prime) := 
+def input : Vector (Zmod testProfile.p) := 
             #[0x0000000000000000000000000000000000000000000000000000000000000000,
               0x0000000000000000000000000000000000000000000000000000000000000001,
               0x0000000000000000000000000000000000000000000000000000000000000002,
               0x0000000000000000000000000000000000000000000000000000000000000003,
               0x0000000000000000000000000000000000000000000000000000000000000004]
 
-def output : Vector (Zmod testProfile.prime) := 
+def output : Vector (Zmod testProfile.p) := 
              #[0x2a918b9c9f9bd7bb509331c81e297b5707f6fc7393dcee1b13901a0b22202e18,
                0x65ebf8671739eeb11fb217f2d5c5bf4a0c3f210e3f3cd3b08b5db75675d797f7,
                0x2cc176fc26bc70737a696a9dfd1b636ce360ee76926d182390cdb7459cf585ce,

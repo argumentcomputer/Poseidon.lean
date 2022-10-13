@@ -2,12 +2,18 @@ import YatimaStdLib.Zmod
 
 namespace Poseidon
 
-structure Profile where
-  (N t fullRounds partialRounds prime : Nat)
-  a : Int
-  sBox : Zmod prime → Zmod prime := fun n => 
-    match a with
-    | .ofNat a => n^a
-    | _        => Zmod.modInv n
+structure SecProfile where
+  M : Nat -- Security 
+  t : Nat -- Internal capacity
+  p : Nat -- Prime
+  a : Int -- SBox exponent
 
-def Profile.n (p : Profile) := p.N/p.t 
+structure HashProfile extends SecProfile where
+  fullRounds : Nat
+  partRounds : Nat
+
+open Zmod in
+def HashProfile.sBox (profile : HashProfile) : Zmod profile.p → Zmod profile.p := 
+  match profile.a with
+  | .ofNat n => fun x => x^n
+  | .negSucc n => fun x => (.modInv x)^(n + 1)
