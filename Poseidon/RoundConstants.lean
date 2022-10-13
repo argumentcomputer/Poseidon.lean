@@ -39,11 +39,16 @@ private def padOne (u : UInt64) : Nat → UInt64
 
 -- TODO : Figure out if choosing to reverse is a bad idea <- We may be too far in -- at this point
 
+private def ByteArray.padLeft (bs : ByteArray) (u : UInt8) : Nat → ByteArray
+  | 0 => bs
+  | n + 1 => ByteArray.mk #[u] ++ bs.padLeft u n
+
 private partial def UInt64.toByteArray (u : UInt64) : ByteArray := 
   let rec loop (u : UInt64) (acc : Array UInt8) :=
     if u == 0 then acc else loop (u >>> 8) <| acc.push (u &&& (0xff : UInt64)).toUInt8
   loop u #[] |>.reverse 
              |> ByteArray.mk
+             |> (fun bs => bs.padLeft 0 (8 - bs.size))
 
 private def grainStateInit (isPrime : Bool) (a : Int) (prime : Nat) (t fullRound partialRound : UInt64) := 
   (fieldBits isPrime) |> (· <<< (4 : UInt64))
@@ -90,9 +95,12 @@ def bArToNat (bs : Array Bit) : Nat := bs.foldl (fun b b' => b*2 + b'.toNat) 0
 private def ByteArray.getD (bs : ByteArray) (idx : Int) : UInt8 :=
   if idx < 0 || bs.size ≤ idx then 0 else bs[idx.toNat]!
 
+private def UInt8.getBit (u : UInt8) (n : Nat) : Bit := 
+  if u &&& (1 <<< (7 - n)).toUInt8 == 0 then zero else one
+
 private def ByteArray.getBit (bs : ByteArray) (n : Nat) : Bit := 
-  let (idx, rem) := (n / 8, 2^(n % 8) |>.toUInt8)
-  if bs[bs.size - 1 - idx]! &&& rem == 0 then zero else one
+  let (idx, rem) := (n / 8, n%8) 
+  bs[idx]!.getBit rem
 
 -- Shifts the byte array left by 1, preserves length (so in particular kills the first coefficient
 private def ByteArray.shiftLeft (bs : ByteArray) : ByteArray := Id.run do
@@ -105,8 +113,6 @@ private def ByteArray.shiftAdd (bs : ByteArray) (b : Bit) : ByteArray :=
   let ans := bs.shiftLeft
   ans.set! (ans.size - 1) (ans[(ans.size - 1)]! + b.toUInt8)
 
-#eval ByteArray.shiftAdd (.mk #[0xef, 0xab]) one
-
 structure RCState (p : Nat) where
   bitRound : Array Bit
   state  : ByteArray
@@ -114,10 +120,11 @@ structure RCState (p : Nat) where
 
 def init (prof : Poseidon.Profile) : RCState prof.prime where
   bitRound := #[]
-  state := grainStateInit true 5 prof.prime 
-                                 prof.t.toUInt64 
-                                 prof.fullRounds.toUInt64 
-                                 prof.partialRounds.toUInt64
+  state := grainStateInit true prof.a 
+                               prof.prime 
+                               prof.t.toUInt64 
+                               prof.fullRounds.toUInt64 
+                               prof.partialRounds.toUInt64
   rndCon := #[]
 
 abbrev RoundConstantM (profile : Poseidon.Profile) := StateM (RCState profile.prime)
@@ -130,12 +137,12 @@ def notEnoughConst : RoundConstantM prof Bool :=
   get >>= fun s => pure $ s.rndCon.size < (prof.fullRounds + prof.partialRounds)*prof.t
 
 def notEnoughBits : RoundConstantM prof Bool :=
-  get >>= fun s => pure $ s.bitRound.size < 255
+  get >>= fun s => pure $ s.bitRound.size < prof.prime.log2 + 1
 
 def extractBit : RoundConstantM prof Bit := do
   let stt := (← get).state
-  let bits := #[stt.getBit 0, stt.getBit 13, stt.getBit 23, 
-                stt.getBit 38, stt.getBit 51, stt.getBit 62]
+  let bits := #[stt.getBit 62, stt.getBit 51, stt.getBit 38, 
+                stt.getBit 23, stt.getBit 13, stt.getBit 0]
   return bArXOr bits
 
 def generateBitArray : RoundConstantM prof Unit := do
@@ -167,15 +174,13 @@ def RoundConstantM.run (profile : Poseidon.Profile) : Array (Zmod profile.prime)
    Id.run <| Prod.snd <$> generate profile (init profile) |>.rndCon
 
 def testProfile : Poseidon.Profile := {
-  N := 1275
-  t := 5
+  N := 1275 -- <- TODO : Should just switch to `M` the security parameter
+  t := 9
   fullRounds := 8
-  partialRounds := 60
-  prime := 0x73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001
-  a := 5
-  sBox := fun x => x^5
+  partialRounds := 41
+  prime := 0xfffffffffffffeff
+  a := 3
+  sBox := fun x => x^3
 }
 
-#eval RoundConstantM.run testProfile |>.size
-
-#eval 68*5
+#eval (RoundConstantM.run testProfile |>.get! 0) == 758662019503705074 -- True
