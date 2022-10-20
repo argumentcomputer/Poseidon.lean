@@ -1,5 +1,6 @@
 import Poseidon.Profile
-import Poseidon.ForYatimaStdLib
+import YatimaStdLib.ByteArray
+import YatimaStdLib.Monad
 import YatimaStdLib.Zmod
 
 /-!
@@ -64,11 +65,11 @@ def extractBit : RoundConstantM prof Bit := do
   let stt := (← get).state
   let bits := #[stt.getBit 62, stt.getBit 51, stt.getBit 38, 
                 stt.getBit 23, stt.getBit 13, stt.getBit 0]
-  return bArXOr bits
+  return Bit.arrayXOr bits
 
 def generateBitArray : RoundConstantM prof Unit := do
   modify fun ⟨_, s, rC⟩ => ⟨#[], s, rC⟩
-  repeatWhile notEnoughBits do
+  Monad.repeatWhile notEnoughBits do
     let b₁ ← extractBit
     modify (fun ⟨br, s, rc⟩ => ⟨br, s.shiftAdd b₁, rc⟩)
     let b₂ ← extractBit
@@ -82,9 +83,9 @@ def generate (prof : Poseidon.HashProfile) : RoundConstantM prof Unit := do
   for _ in [:160] do
     let b ← extractBit
     modify (fun ⟨br, s, rc⟩ => ⟨br, s.shiftAdd b, rc⟩)
-  repeatWhile notEnoughConst do
+  Monad.repeatWhile notEnoughConst do
     generateBitArray
-    let c := bArToNat (← get).bitRound
+    let c := Bit.arrayToNat (← get).bitRound
     if c < prof.p then 
       modify fun ⟨bR, s, rC⟩ => ⟨bR, s, rC.push c⟩
     else

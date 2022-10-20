@@ -1,7 +1,7 @@
 import Poseidon.Profile
-import Poseidon.ForYatimaStdLib
 import YatimaStdLib.Zmod
 import YatimaStdLib.Matrix
+import YatimaStdLib.Monad
 
 namespace Poseidon
 
@@ -47,6 +47,7 @@ def partialRound : HashM profile PUnit :=
   (modify fun ⟨r, vec⟩ => ⟨r.succ, vec.set! 0 (profile.sBox vec[0]!)⟩) *>
   linearLayer profile
 
+open Monad in
 def runRounds : HashM profile PUnit :=  
   repeatM (fullRound profile) (profile.fullRounds / 2) *>
   repeatM (partialRound profile) (profile.partRounds) *>
@@ -67,7 +68,7 @@ def validateInputs (context : Context profile)  (input : Vector (Zmod profile.p)
   profile.t == context.mdsMatrix.size &&
   profile.t == context.mdsMatrix.transpose.size
 
-def hash (context : Context profile)  (input : Vector (Zmod profile.p)) : Vector (Zmod profile.p) := 
+def hashInput (context : Context profile) (input : Vector (Zmod profile.p)) : Vector (Zmod profile.p) := 
   if validateInputs profile context input then (HashM.hash profile context input).state else #[]
 
 end Poseidon

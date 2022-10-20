@@ -1,8 +1,8 @@
 import Poseidon.Profile
-import Poseidon.ForYatimaStdLib
-import YatimaStdLib.NonEmpty
+import YatimaStdLib.Float
 import YatimaStdLib.List
 import YatimaStdLib.Nat
+import YatimaStdLib.NonEmpty
 
 /-!
 # Calculate Round Numbers
@@ -36,7 +36,7 @@ private instance : Coe Int Float where
     | .ofNat n   => Nat.toFloat n
     | .negSucc n => - Nat.toFloat n.succ
 
-open Float (log log2 ceil toNat floor)
+open Float (log log2 ceil toNat floor logBase)
 
 /--
 Taken from the reference implementation

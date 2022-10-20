@@ -1,6 +1,6 @@
 import LSpec
 import Poseidon.Hash
-import Poseidon.Parameters.PoseidonPerm255
+import Poseidon.Parameters.Perm255
 
 open LSpec
 
@@ -30,6 +30,6 @@ def output : Vector (Zmod testProfile.p) :=
                0x03ff622da276830b9451b88b85e6184fd6ae15c8ab3ee25a5667be8592cce3b1]
 
 #lspec 
-  test "poseidonperm_x5_255_5" (Poseidon.hash testProfile testContext input == output)
+  test "poseidonperm_x5_255_5" (Poseidon.hashInput testProfile testContext input == output)
 
 end poseidonperm_x5_255_5
