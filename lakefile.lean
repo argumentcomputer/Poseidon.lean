@@ -3,7 +3,11 @@ open Lake DSL
 
 package Poseidon 
 
+@[defaultTarget]
 lean_lib Poseidon
 
-require mathlib3port from git
-   "https://github.com/leanprover-community/mathlib3port.git"@"a46edb9fec446cdef642ca202ea14eff6f38c64e"
+require YatimaStdLib from git
+  "https://github.com/yatima-inc/YatimaStdLib.lean" @ "cbf5cd7c098c4369d93b9b8399a323bf0a28c107"
+
+require LSpec from git
+   "https://github.com/yatima-inc/LSpec" @ "9c9f3cc9f3148c1b2d6071a35e54e4c5392373b7"
