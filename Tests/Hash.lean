@@ -34,7 +34,7 @@ def PermX5_254_3.output : Vector (Zmod PermX5_254_3.p) :=
 
 open PermX5_254_3 in
 def permX5_254_3_test := test "Perm_x5_254_3 hashes match" $
-  Poseidon.hashInput PermX5_254_3 PermX5_254_3.Context input == output
+  Poseidon.hashInputWithCtx PermX5_254_3 PermX5_254_3.Context input == output
 
 end PermX5_254_3
 
@@ -56,7 +56,7 @@ def PermX5_254_5.output : Vector (Zmod PermX5_254_5.p) :=
 
 open PermX5_254_5 in
 def permX5_254_5_test := test "Perm_x5_254_5 hashes match" $
-  Poseidon.hashInput PermX5_254_5 PermX5_254_5.Context input == output
+  Poseidon.hashInputWithCtx PermX5_254_5 PermX5_254_5.Context input == output
 
 end PermX5_254_5
 
@@ -74,7 +74,7 @@ def PermX5_255_3.output : Vector (Zmod PermX5_255_3.p) :=
 
 open PermX5_255_3 in
 def permX5_255_3_test := test "Perm_x5_255_3 hashes match" $
-  Poseidon.hashInput PermX5_255_3 PermX5_255_3.Context input == output
+  Poseidon.hashInputWithCtx PermX5_255_3 PermX5_255_3.Context input == output
 
 end PermX5_255_3
 
@@ -96,7 +96,7 @@ def PermX5_255_5.output : Vector (Zmod PermX5_255_5.p) :=
 
 open PermX5_255_5 in
 def permX5_255_5_test := test "Perm_x5_255_5 hashes match" $
-  Poseidon.hashInput PermX5_255_5 PermX5_255_5.Context input == output
+  Poseidon.hashInputWithCtx PermX5_255_5 PermX5_255_5.Context input == output
 
 end PermX5_255_5
 
@@ -111,12 +111,12 @@ section PythonImplementation
 def output254 : Zmod pyProfile254.p := 0x1357e867b0efbd9d865420117785ee2c9360745c7c5b4bc11782be67e6cb0b59
 
 def py254_test := test "pyProfile254 hashes match" $
-  (Poseidon.hashInput pyProfile254 pyProfile254.Context #[0,1,2])[1]! == output254
+  (Poseidon.hashInputWithCtx pyProfile254 pyProfile254.Context #[0,1,2])[1]! == output254
 
 def output255 : Zmod pyProfile255.p := 0x4415f84efb53753a723c8a57fc8a56038b88471d4bb32fb8d82240289fd0a33d
 
 def py255_test := test "pyProfile255 hashes match" $
-  (Poseidon.hashInput pyProfile255 pyProfile255.Context #[0,1,2,3,4])[1]! == output255
+  (Poseidon.hashInputWithCtx pyProfile255 pyProfile255.Context #[0,1,2,3,4])[1]! == output255
 
 def pyTests : TestSeq := group "Python implementation hash tests" $
   py254_test ++ py255_test
