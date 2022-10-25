@@ -3,6 +3,14 @@ import Poseidon.Profile
 import YatimaStdLib.Matrix
 import YatimaStdLib.Zmod
 
+/-!
+# Python hashing test parameters
+
+The following parameters are taken from 
+<https://github.com/ingonyama-zk/poseidon-hash/blob/main/poseidon/parameters.py>
+and used in the hashing tests. 
+-/
+
 open Poseidon
 
 def pyProfile254 : HashProfile := {
