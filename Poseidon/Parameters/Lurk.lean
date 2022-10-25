@@ -6,7 +6,9 @@ import YatimaStdLib.Zmod
 /-!
 # Parameters for Lurk Profile
 
-The following parameters are taken from the reference implementation: poseidonperm_x5_255_3.sage
+The following parameters are generated to be used in for hashing associated with Lurk. 
+
+They match the Filecoin parameters for width `t = 5`. 
 -/
 
 namespace Poseidon
