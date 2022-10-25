@@ -30,9 +30,15 @@ Pre-computed profiles and contexts are available in the `Poseidon.Parameters` fo
 
 For Lurk specific hashing purposes, the `Poseidon.ForLurk` module contains 
 ```lean
-abbrev F' := Zmod Lurk.Profile.p
+namespace Poseidon.Lurk
 
-def Lurk.hash : F' → F' → F' → F' → F'
+abbrev F := Zmod Lurk.Profile.p
+
+def Context : Hash.Context Profile :=
+  ⟨Lurk.MDS, Lurk.roundConstants⟩
+
+def hash (f₁ f₂ f₃ f₄ : F) : F :=
+  Poseidon.hash Profile Context #[f₁, f₂, f₃, f₄] .merkleTree
 ```
 which computes the arity 4 hashes found in the [lurk-rs](https://github.com/lurk-lang/lurk-rs/). 
 

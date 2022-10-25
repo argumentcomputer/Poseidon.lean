@@ -13,7 +13,8 @@ namespace Poseidon.Lurk
 abbrev F := Zmod Lurk.Profile.p
 
 /-- The pre-computed hashing context used by Lurk. -/
-def Context : Hash.Context Profile := ⟨Lurk.MDS, Lurk.roundConstants⟩
+def Context : Hash.Context Profile :=
+  ⟨Lurk.MDS, Lurk.roundConstants⟩
 
 /--
 The hashing function used by Lurk that uses pre-initialized Lurk parameters and
