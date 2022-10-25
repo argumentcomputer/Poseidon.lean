@@ -13,7 +13,8 @@ generates round numbers satisfying the following _security inequalities_, while 
 number of _SBox_ calls:
 
 1) `2^M ≤ p^t`: Ensures sufficient data throughput
-Note: This is manifestly satisfied by the chosen `p, M, t` for Filecoin/Lurk
+Note: This is manifestly satisfied by the chosen `p, M, t` for Filecoin/Lurk, and should be checked
+in other cases.
 
 2) `fullRounds ≥ 6`: Ensures protection from statistical attacks
 
@@ -25,8 +26,6 @@ Note: This simplifies to `R > 57 or 58` for Filecoin/Lurk's chosen parameters
 4a) `R > M logₐ2 / 3`
 4b) `R > t - 1 + M logₐ2 / (t + 1)` Ensuring protection from Gaussian elimination attacks
 Note: `4a)` simplifies to `R > 18.3` for Filecoin/Lurk's chosen parameters
-
-The 
 -/
 
 private instance : Coe Nat Float := ⟨UInt64.toFloat ∘ Nat.toUInt64⟩
@@ -39,9 +38,12 @@ private instance : Coe Int Float where
 open Float (log log2 ceil toNat floor logBase)
 
 namespace Poseidon
+
 /--
-Taken from the reference implementation
-TODO : Double check this with the white paper, b R_F_1 = 6 if M <= ((floor(log(p, 2) - 2)) * (t + 1)) else 10 # Statisticalecause there are some weird things going on here...
+This function tests whether the number of full rounds and partial rounds `rF` and `rP` form a secure
+hash profile given `p t M` and `a`. 
+
+These bounds are taken from the reference implementation/white paper. 
 -/
 def securityTest (p t M rF rP : Nat) (a : Int) : Bool :=
   let n := p.log2 + 1
@@ -72,10 +74,13 @@ def securityTest (p t M rF rP : Nat) (a : Int) : Bool :=
     false
 
 /--
-Taken from the Python implementation
+This function tests whether the number of full rounds and partial rounds `rF` and `rP` form a secure
+hash profile given `p t M` and `a`. 
+
+These bounds are taken from the Python implementation, and match those in the reference implementation.
 -/
 def securityTest' (p t M rF rP : Nat) (a : Int) : Bool :=
-  let primeBitLen := p.log2 + 1 -- FIXME : I don't like this `+ 1` fix, but it works for now.
+  let primeBitLen := p.log2 + 1 -- TODO : I don't like this `+ 1` fix, but it works for now.
   let c := if a > 0 then log2 (a - 1) else 2
   let fullRoundStat : Float := if M ≤ (floor (primeBitLen) - c) * (t + 1) then 6 else 10
   if a > 0 then
@@ -102,7 +107,12 @@ def securityTest' (p t M rF rP : Nat) (a : Int) : Bool :=
   else
     false -- Any other value of `a` should be deemed insecure and not return any round numbers
 
--- Note the .43 is short for 1 / logBase 2 5 = logBase 5 2
+/--
+This is the security test used in the Filecoin rust implementation of the round number generator.
+
+FIXME : This test has different behavior from the reference, and python implementations. See the
+github issue: <https://github.com/filecoin-project/neptune/issues/147>
+-/
 def securityTest'' (_ t _ rF rP : Nat) (_ : Int) : Bool := 
   let n : Float := 256 -- (Or 255??)
   let M : Float := 128
@@ -122,6 +132,10 @@ private def sizeCost (rF rP N t : Nat) : Nat :=
 
 private def depthCost (rF rP : Nat) : Nat := rF + rP
 
+/--
+A brute-force algorithm that goes through the and finds the number of full and partial rounds that
+are secure according to the bounds presented in the white paper, but minimize the s box cost.
+-/
 def findRoundNumbers (p t M : Nat) (a : Int) (secMargin : Bool) : Nat × Nat := Id.run do
   let mut rP := 0
   let mut rF := 0
@@ -140,7 +154,12 @@ def findRoundNumbers (p t M : Nat) (a : Int) (secMargin : Bool) : Nat × Nat := 
           minCost := cost
           maxRF := rF
   return (rF, rP)
-  
+
+/--
+A secure `Hash.Profile` given a security profile and an additional security parameter which inflates
+the number of partial rounds by `7.5%`. The resulting `Hash.Profile` minimizes the s box cost of the
+chosen full and partial round numbers.
+-/
 def SecProfile.hashProfile (prof : SecProfile) (sec : Bool) : HashProfile :=
   let (rF, rP) := findRoundNumbers prof.p prof.t prof.M prof.a sec
   {prof with
