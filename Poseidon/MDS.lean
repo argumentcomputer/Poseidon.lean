@@ -10,6 +10,8 @@ implementation of the Poseidon hash function
 TODO : Add more MDS matrix generation paradigms, and add security tests for generated matrices.
 -/
 
+namespace Poseidon
+
 /--
 Generates an `t × t` Cauchy matrix over `Zmod p` with `i, j` entry `(i + t + j)⁻¹`.
 This is the matrix  used as the MDS matrix for Filecoin.

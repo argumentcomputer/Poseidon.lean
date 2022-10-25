@@ -11,7 +11,7 @@ The following parameters are taken from
 and used in the hashing tests. 
 -/
 
-open Poseidon
+namespace Poseidon
 
 def pyProfile254 : HashProfile := {
   M := 128

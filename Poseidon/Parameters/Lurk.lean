@@ -377,6 +377,4 @@ def roundConstants : Array (Zmod Lurk.Profile.p):=
   0x3eab2335c4e9540a6c4139bded832d87c7027dc78096eac35d40b19737dd2062,
   0x34e974d8cb3be2818f7a6a121a5c6057ed5037226d29e56d20a5ff71a4bec6eb]
 
-def Context : Hash.Context Lurk.Profile := ⟨Lurk.MDS, Lurk.roundConstants⟩
-
 end Lurk
