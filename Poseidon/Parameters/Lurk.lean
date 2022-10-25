@@ -1,16 +1,16 @@
+import Poseidon.Hash
 import Poseidon.Profile
 import YatimaStdLib.Matrix
 import YatimaStdLib.Zmod
 
 /-!
-# Parameters for the Lurk Poseidon Profile
+# Parameters for Lurk Profile
+
+The following parameters are taken from the reference implementation: poseidonperm_x5_255_3.sage
 -/
 
 namespace Poseidon
 
-/--
-Basic
--/
 def SecLurk : SecProfile := {
   M := 128
   t := 5
@@ -374,5 +374,7 @@ def roundConstants : Array (Zmod Lurk.Profile.p):=
   0x6d4c0a9ba1d4f18c60879c457d8aef05837ff2876689c0d6c8e63013f4a5ceca,
   0x3eab2335c4e9540a6c4139bded832d87c7027dc78096eac35d40b19737dd2062,
   0x34e974d8cb3be2818f7a6a121a5c6057ed5037226d29e56d20a5ff71a4bec6eb]
+
+def Context : Hash.Context Lurk.Profile := ⟨Lurk.MDS, Lurk.roundConstants⟩
 
 end Lurk

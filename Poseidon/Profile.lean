@@ -7,10 +7,12 @@ structure SecProfile where
   t : Nat -- Internal capacity
   p : Nat -- Prime
   a : Int -- SBox exponent
+deriving Repr
 
 structure HashProfile extends SecProfile where
   fullRounds : Nat
   partRounds : Nat
+deriving Repr
 
 open Zmod in
 def HashProfile.sBox (profile : HashProfile) : Zmod profile.p → Zmod profile.p := 

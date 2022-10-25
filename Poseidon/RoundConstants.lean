@@ -11,11 +11,15 @@ TODO : Add documentation
 
 private def fieldBits (isPrime : Bool) : UInt64 := if isPrime then 1 else 0
 
-private def sBoxBits : Int → UInt64
+private def lurkSBoxBits : Int → UInt64
   | -1 => 2
   |  3 => 0
   |  5 => 1
   |  _ => 3
+
+private def refSBoxBits : Int → UInt64
+  | .ofNat   _ => 0
+  | .negSucc _ => 1
 
 private def fieldSizeBits (prime : Nat) : UInt64 := prime.log2 + 1 |>.toUInt64
 
@@ -23,7 +27,9 @@ private def padOne (u : UInt64) : Nat → UInt64
   | 0     => u
   | n + 1 => (u <<< 1) + 1 |> (padOne · n)
 
-private def grainStateInit (isPrime : Bool) (a : Int) (prime : Nat) (t fullRound partialRound : UInt64) := 
+private def grainStateInit (usingRef isPrime : Bool) (a : Int) (prime : Nat) 
+                           (t fullRound partialRound : UInt64) := 
+  let sBoxBits := if usingRef then refSBoxBits else lurkSBoxBits
   (fieldBits isPrime) |> (· <<< (4 : UInt64))
                       |> (· + sBoxBits a)
                       |> (· <<< (12 : UInt64))
@@ -39,14 +45,16 @@ private def grainStateInit (isPrime : Bool) (a : Int) (prime : Nat) (t fullRound
                       |>.push 0xff
                       |>.push 0xff
 
+namespace Poseidon
+
 structure RCState (p : Nat) where
   bitRound : Array Bit
   state  : ByteArray
   rndCon : Array (Zmod p)
 
-def init (prof : Poseidon.HashProfile) : RCState prof.p where
+def RCState.init (usingRef : Bool) (prof : Poseidon.HashProfile) : RCState prof.p where
   bitRound := #[]
-  state := grainStateInit true prof.a 
+  state := grainStateInit usingRef true prof.a 
                                prof.p
                                prof.t.toUInt64 
                                prof.fullRounds.toUInt64 
@@ -54,6 +62,8 @@ def init (prof : Poseidon.HashProfile) : RCState prof.p where
   rndCon := #[]
 
 abbrev RoundConstantM (profile : Poseidon.HashProfile) := StateM (RCState profile.p)
+
+namespace RoundConstantM
 
 def notEnoughConst : RoundConstantM prof Bool := 
   get >>= fun s => pure $ s.rndCon.size < (prof.fullRounds + prof.partRounds)*prof.t
@@ -79,7 +89,10 @@ def generateBitArray : RoundConstantM prof Unit := do
     else
       pure ()
 
-def generate (prof : Poseidon.HashProfile) : RoundConstantM prof Unit := do 
+end RoundConstantM
+
+open RoundConstantM in
+def runGeneration (prof : Poseidon.HashProfile) : RoundConstantM prof Unit := do 
   for _ in [:160] do
     let b ← extractBit
     modify (fun ⟨br, s, rc⟩ => ⟨br, s.shiftAdd b, rc⟩)
@@ -92,5 +105,5 @@ def generate (prof : Poseidon.HashProfile) : RoundConstantM prof Unit := do
       return ()
   return ()
 
-def RoundConstantM.run (profile : Poseidon.HashProfile) : Array (Zmod profile.p) :=
-   Id.run <| Prod.snd <$> generate profile (init profile) |>.rndCon
+def generateRConstants (usingRef : Bool) (profile : Poseidon.HashProfile) : Array (Zmod profile.p) :=
+   Id.run <| Prod.snd <$> runGeneration profile (.init usingRef profile) |>.rndCon

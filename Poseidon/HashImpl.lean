@@ -16,7 +16,7 @@ def getInput (prof : HashProfile)
   match domain with
     | .merkleTree => 
       if preimage.size != prof.t - 1 then none else
-        let domainTag : Zmod prof.p := .ofNat $ 2^(preimage.size - 1) -1 
+        let domainTag : Zmod prof.p := .ofNat $ 2^(preimage.size) -1 
         some $ #[domainTag] ++ preimage
     | .fixedLength  => 
       if preimage.size > prof.t - 1 then none else

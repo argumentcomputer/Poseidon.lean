@@ -1,18 +1,18 @@
+import Poseidon.Hash
 import Poseidon.Profile
 import YatimaStdLib.Matrix
 import YatimaStdLib.Zmod
 
 /-!
-# Parameters for _______
+# Parameters for PermX5_255_5 Profile
+
+The following parameters are taken from the reference implementation: poseidonperm_x5_255_5.sage
 -/
 
 namespace Poseidon
 
-/--
-Basic
--/
 def SecPermX5_255_5 : SecProfile := {
-  M := 255
+  M := 128
   t := 5
   p := 0x73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001
   a := 5
@@ -395,3 +395,7 @@ def roundConstants : Array (Zmod PermX5_255_5.p) :=
   0x53a26c6e2b3df0b17faf6a259bc5531d3ae79da59eb8fc5f594e0b886d8d97be,
   0x207c7c32631a75fe8e0da895367176d24e32c5573ec91acf235f3c6c307807cd,
   0x20f955773b13b160d3575eb2380b466f7d38cb4a0e12a15d43d147645c3944ca]
+
+def Context : Hash.Context PermX5_255_5 := ⟨PermX5_255_5.MDS, PermX5_255_5.roundConstants⟩
+
+end PermX5_255_5
