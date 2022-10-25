@@ -3,10 +3,11 @@ import YatimaStdLib.Matrix
 import YatimaStdLib.Zmod
 
 /-!
-# Parameters for profiles used in test
+# Python round constant test parameters
 
-The following parameters are taken from the Python implementation: 
-https://github.com/ingonyama-zk/poseidon-hash/blob/main/poseidon/parameters.py
+The following parameters are taken from 
+<https://github.com/ingonyama-zk/poseidon-hash/blob/main/poseidon/parameters.py>
+and used in the round constant generator tests. 
 -/
 
 open Poseidon

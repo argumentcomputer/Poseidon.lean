@@ -4,9 +4,18 @@ import YatimaStdLib.Zmod
 /-!
 # Generates the Poseidon MDS Matrix
 
-TODO : Add documentation
+This module contains the basic functionality to generate the MDS matrix used in the Filecoin/Lurk
+implementation of the Poseidon hash function
+
+TODO : Add more MDS matrix generation paradigms, and add security tests for generated matrices.
 -/
 
+namespace Poseidon
+
+/--
+Generates an `t × t` Cauchy matrix over `Zmod p` with `i, j` entry `(i + t + j)⁻¹`.
+This is the matrix  used as the MDS matrix for Filecoin.
+-/
 def generatePoseidonMDS (p t : Nat) : Matrix (Zmod p) := Id.run do
   let mut answer : Matrix (Zmod p) := #[]
   for c in [0 : t] do

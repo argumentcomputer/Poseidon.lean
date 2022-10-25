@@ -1,11 +1,24 @@
 import Poseidon.HashImpl
 import Poseidon.Parameters.Lurk
 
-open Poseidon
+/-!
+# Parameters for Lurk Profile
 
-abbrev F' := Zmod Lurk.Profile.p
+This module contains the definitions necessary to use the exact profile,
+context, and input formatting to mirror the Poseidon hashing used in Lurk.
+-/
 
-def Lurk.Context : Hash.Context Lurk.Profile := ⟨Lurk.MDS, Lurk.roundConstants⟩
+namespace Poseidon.Lurk
 
-def Lurk.Hash : F' → F' → F' → F' → F'
-  | f₁, f₂, f₃, f₄ => hash Lurk.Profile Lurk.Context #[f₁, f₂, f₃, f₄] .merkleTree
+abbrev F := Zmod Lurk.Profile.p
+
+/-- The pre-computed hashing context used by Lurk. -/
+def Context : Hash.Context Profile :=
+  ⟨Lurk.MDS, Lurk.roundConstants⟩
+
+/--
+The hashing function used by Lurk that uses pre-initialized Lurk parameters and
+constants.
+-/
+def hash (f₁ f₂ f₃ f₄ : F) : F :=
+  Poseidon.hash Profile Context #[f₁, f₂, f₃, f₄] .merkleTree
