@@ -1,19 +1,17 @@
 import Lake
 open Lake DSL
 
-package Poseidon where
-  moreLinkArgs := #["-lrust_ffi", "-L", "./target/release"]
+package Poseidon
 
 @[default_target]
 lean_lib Poseidon
 
 require YatimaStdLib from git
-  "https://github.com/yatima-inc/YatimaStdLib.lean" @ "f452d52c281031a7c3cba5e465a8dc6241209ed3"
+  "https://github.com/yatima-inc/YatimaStdLib.lean" @ "704823e421b333ea9960347e305c60f654618422"
 
 require LSpec from git
-  "https://github.com/yatima-inc/LSpec.git" @ "129fd4ba76d5cb9abf271dc29208a28f45fd981e"
+  "https://github.com/yatima-inc/LSpec.git" @ "88f7d23e56a061d32c7173cea5befa4b2c248b41"
 
--- Tests
 lean_exe Tests.RoundNumbers
 lean_exe Tests.RoundConstants
 lean_exe Tests.Hash
@@ -29,10 +27,11 @@ target importTarget (pkg : Package) : FilePath := do
     compileO ffiC oFile srcFile flags
 
 extern_lib libffi (pkg : Package) := do
-  proc { cmd := "cargo", args := #["build", "--release"] }
   let name := nameToStaticLib "ffi"
   let job ← fetch <| pkg.target ``importTarget
   buildStaticLib (pkg.libDir / name) #[job]
 
-lean_exe test where
-  root := `Main
+extern_lib rust_ffi (pkg : Package) := do
+  proc { cmd := "cargo", args := #["build", "--release"], cwd := pkg.dir }
+  let name := nameToStaticLib "rust_ffi"
+  return (pure $ pkg.dir / "target" / "release" / name)
