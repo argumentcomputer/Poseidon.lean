@@ -4,7 +4,8 @@ open Lake DSL
 package Poseidon
 
 @[default_target]
-lean_lib Poseidon
+lean_lib Poseidon where
+  precompileModules := true
 
 require YatimaStdLib from git
   "https://github.com/yatima-inc/YatimaStdLib.lean" @ "704823e421b333ea9960347e305c60f654618422"
@@ -34,4 +35,8 @@ extern_lib libffi (pkg : Package) := do
 extern_lib rust_ffi (pkg : Package) := do
   proc { cmd := "cargo", args := #["build", "--release"], cwd := pkg.dir }
   let name := nameToStaticLib "rust_ffi"
-  return (pure $ pkg.dir / "target" / "release" / name)
+  let srcPath := pkg.dir / "target" / "release" / name
+  IO.FS.createDirAll pkg.libDir
+  let tgtPath := pkg.libDir / name
+  IO.FS.writeBinFile tgtPath (← IO.FS.readBinFile srcPath)
+  return (pure tgtPath)
