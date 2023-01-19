@@ -12,6 +12,8 @@ TODO : Add more MDS matrix generation paradigms, and add security tests for gene
 
 namespace Poseidon
 
+instance : Ring (Zmod n) where
+
 /--
 Generates an `t × t` Cauchy matrix over `Zmod p` with `i, j` entry `(i + t + j)⁻¹`.
 This is the matrix  used as the MDS matrix for Filecoin.

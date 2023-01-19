@@ -157,7 +157,7 @@ def testContext (arity : Nat) : Hash.Context (testProfile arity) := {
 
 def testInput (arity : Nat) : Array $ Zmod (testProfile arity).p := 
   List.iota arity |>.reverse 
-                  |>.map (.ofInt ∘ .ofNat ∘ .pred)
+                  |>.map (Coe.coe ∘ Nat.pred)
                   |>.toArray
 
 def runTest (arity : Nat) (domain : Domain) := 
