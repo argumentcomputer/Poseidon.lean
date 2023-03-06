@@ -143,3 +143,18 @@ unless it is necessary to match the reference implementation.
 -/
 def generateRConstants (usingRef : Bool) (profile : Poseidon.HashProfile) : Array (Zmod profile.p) :=
    Id.run <| Prod.snd <$> runGeneration profile (.init usingRef profile) |>.rndCon
+
+-- TODO: Delete this
+-- def SecLurk3 : SecProfile := {
+--   M := 128
+--   t := 4
+--   p := 0x73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001
+--   a := 5
+-- }
+
+-- def Lurk3.Profile : HashProfile := {
+--   SecLurk3 with
+--   fullRounds := 8
+--   partRounds := 55
+-- }
+-- #eval generateRConstants false Lurk3.Profile 
