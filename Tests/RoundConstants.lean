@@ -53,7 +53,7 @@ end PythonImplementation
 section FilecoinImplementation
 
 def rustTest : TestSeq := test "Rust implementation constants match" $
-  generateRConstants false Lurk4.Profile == Lurk4.roundConstants
+  generateRConstants false Lurk4.hashProfile == Lurk4.roundConstants
 
 end FilecoinImplementation
 
