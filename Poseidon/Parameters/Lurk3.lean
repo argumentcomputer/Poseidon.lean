@@ -1,5 +1,6 @@
 import Poseidon.Hash
 import Poseidon.Profile
+import Poseidon.Parameters.Lurk
 import YatimaStdLib.Matrix
 import YatimaStdLib.Zmod
 
@@ -8,7 +9,7 @@ namespace Poseidon
 def SecLurk3 : SecProfile := {
   M := 128
   t := 4
-  p := 0x73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001
+  p := Lurk.p
   a := 5
 }
 
@@ -17,6 +18,7 @@ def Lurk3.Profile : HashProfile := {
   fullRounds := 8
   partRounds := 56
 }
+
 namespace Lurk3
 
 def MDS : Array $ Array (Zmod Lurk3.Profile.p) := 
