@@ -1,6 +1,6 @@
 import LSpec
 import Poseidon.RoundConstants
-import Poseidon.Parameters.Lurk
+import Poseidon.Parameters.Lurk4
 import Poseidon.Parameters.PermX5_254_3
 import Poseidon.Parameters.PermX5_254_5
 import Poseidon.Parameters.PermX5_255_3
@@ -53,7 +53,7 @@ end PythonImplementation
 section FilecoinImplementation
 
 def rustTest : TestSeq := test "Rust implementation constants match" $
-  generateRConstants false Lurk.Profile == Lurk.roundConstants
+  generateRConstants false Lurk4.hashProfile == Lurk4.roundConstants
 
 end FilecoinImplementation
 
