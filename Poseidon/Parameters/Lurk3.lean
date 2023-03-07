@@ -1,29 +1,23 @@
 import Poseidon.Hash
 import Poseidon.Profile
 import Poseidon.Parameters.Lurk
-import YatimaStdLib.Matrix
-import YatimaStdLib.Zmod
-import Poseidon.MDS
-import Poseidon.RoundConstants
 
-namespace Poseidon
+namespace Poseidon.Lurk3
 
-def SecLurk3 : SecProfile := {
+def secProfile : SecProfile := {
   M := 128
   t := 4
   p := Lurk.p
   a := 5
 }
 
-def Lurk3.Profile : HashProfile := {
-  SecLurk3 with
+def hashProfile : HashProfile := {
+  secProfile with
   fullRounds := 8
   partRounds := 56
 }
 
-namespace Lurk3
-
-def MDS : Array $ Array (Zmod Lurk3.Profile.p) := 
+def MDS : Array $ Array (Zmod hashProfile.p) := 
 #[#[0x3000000000000000000000000000000019b4f2bd072f7ea629353058c0000001,
     0x19999999999999999999999999999999a74f7064d0a1dd256b4f914066666667,
     0x3555555555555555555555555555555571e57f7cb2a68cb89f906e9b80000001,
@@ -41,7 +35,7 @@ def MDS : Array $ Array (Zmod Lurk3.Profile.p) :=
     0x38e38e38e38e38e38e38e38e38e38e390205dd51cfa0961a43cd42c800000001,
     0x2ccccccccccccccccccccccccccccccce4cb04b06d1b43017bcb3e30b3333334]]
 
-def roundConstants : Array (Zmod Lurk3.Profile.p):= 
+def roundConstants : Array (Zmod hashProfile.p):= 
 #[0x307afe4a167ba0d1d93f60f15346bda015fa08615bc785bd204aee1741264d5,
   0x181b9f96bd7efa33178ba5316e4441a392c2bb1e0d5437a8ff1613f5997cc4cf,
   0xe09bd2528ba0b94d6ed86121aa48abf769d47c65138c5993a573528d2f09837,
@@ -299,6 +293,4 @@ def roundConstants : Array (Zmod Lurk3.Profile.p):=
   0x6a0c4e8df30788df294460a2d09e409130b0745f3340e3daca3b9ed7659d79f,
   0xd60ba76566d922ef507ae49f878d62ffa76d25161779dc5632b414513644d4c]
 
-
-
-  end Lurk3
+  end Poseidon.Lurk3
