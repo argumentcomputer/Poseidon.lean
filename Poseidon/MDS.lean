@@ -13,6 +13,8 @@ TODO : Add more MDS matrix generation paradigms, and add security tests for gene
 namespace Poseidon
 
 instance : Ring (Zmod n) where
+  zero := 0
+  one := 1
 
 /--
 Generates an `t × t` Cauchy matrix over `Zmod p` with `i, j` entry `(i + t + j)⁻¹`.
