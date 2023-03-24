@@ -8,10 +8,10 @@ lean_lib Poseidon where
   precompileModules := true
 
 require YatimaStdLib from git
-  "https://github.com/yatima-inc/YatimaStdLib.lean" @ "92e5f1d578e307668a00036845ddebc7685134a2"
+  "https://github.com/lurk-lab/YatimaStdLib.lean" @ "92e5f1d578e307668a00036845ddebc7685134a2"
 
 require LSpec from git
-  "https://github.com/yatima-inc/LSpec.git" @ "88f7d23e56a061d32c7173cea5befa4b2c248b41"
+  "https://github.com/lurk-lab/LSpec" @ "88f7d23e56a061d32c7173cea5befa4b2c248b41"
 
 lean_exe Tests.RoundNumbers
 lean_exe Tests.RoundConstants
